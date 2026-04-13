@@ -1,8 +1,0 @@
-{
-	frankenphp
-}
-
-:80 {
-	root * public/
-	php_server
-}
