@@ -1,0 +1,56 @@
+services:
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    ports:
+      - "9081:80"
+      - "9444:443"
+      - "9444:9444/udp"
+      - "2021:2019"
+    volumes:
+      - .:/app
+      - /app/vendor
+    environment:
+      SERVER_NAME: localhost
+      APP_ENV: local
+      APP_DEBUG: 'true'
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: shipment_dev
+      DB_USERNAME: laravel
+      DB_PASSWORD: secret
+      MERCURE_PUBLISHER_JWT_KEY: '!ChangeMe!'
+      MERCURE_SUBSCRIBER_JWT_KEY: '!ChangeMe!'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - shipment-net
+
+  postgres:
+    image: postgis/postgis:15-3.3-alpine
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_DB: shipment_dev
+      POSTGRES_USER: laravel
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U laravel -d shipment_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - shipment-net
+
+volumes:
+  postgres_data:
+
+networks:
+  shipment-net:
+    driver: bridge
