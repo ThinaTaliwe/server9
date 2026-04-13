@@ -1,0 +1,219 @@
+# Karrio
+
+-   Website: <https://karrio.io>
+-   Documentation: [https://karrio.io/docs](https://karrio.io/docs)
+-   Forums: [Github Discussions](https://github.com/orgs/karrioapi/discussions)
+-   Discord: [Karrio Discord server](https://discord.gg/gS88uE7sEx)
+-   Issues: [Issue Tracker](https://github.com/orgs/karrioapi/discussions/categories/q-a)
+-   Blog: [Blog](https://karrio.io/blog)
+
+<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=e72dd847-dc7f-4f81-bce4-88eeb20d807f" />
+<a href="https://karrio.io" target="_blank">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/karrioapi/karrio/main/apps/api/karrio/server/static/extra/branding/logo-inverted.svg" height="100px" />
+    <img alt="Karrio" src="https://raw.githubusercontent.com/karrioapi/karrio/main/apps/api/karrio/server/static/extra/branding/logo.svg" height="100px" />
+  </picture>
+</a>
+
+The open-source shipping platform for modern logistics
+
+[![Karrio OSS](https://img.shields.io/badge/License-LGPL_3.0-blue.svg)](./LICENSE)
+[![Karrio Enterprise](https://img.shields.io/badge/Enterprise-Karrio_EE-orange.svg)](./LICENSE_EE)
+[![karrio-tests](https://github.com/karrioapi/karrio/actions/workflows/tests.yml/badge.svg)](https://github.com/karrioapi/karrio/actions/workflows/tests.yml)
+[![karrio-build](https://github.com/karrioapi/karrio/actions/workflows/build.yml/badge.svg)](https://github.com/karrioapi/karrio/actions/workflows/build.yml)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/cc2ac4fcb6004bca84e42a90d8acfe41)](https://www.codacy.com/gh/karrioapi/karrio/dashboard?utm_source=github.com&utm_medium=referral&utm_content=karrioapi/karrio&utm_campaign=Badge_Grade)
+[![Discord](https://img.shields.io/static/v1?label=Discord&message=chat&color=738adb&logo=discord)](https://discord.gg/gS88uE7sEx)
+[![Docker pulls](https://img.shields.io/docker/pulls/karrio/server)](https://hub.docker.com/r/karrio/server)
+
+Karrio allows you to integrate with your shipping carriers to query, visualize and manage shipping API
+transactions. Integrate, connect and process shipping transactions with a modern tech stack:
+
+-   **Headless Shipping**: Access a network of shipping carriers API-first.
+-   **Multi-carrier API**: Build shipping functionalities with webhooks, APIs and metadata.
+-   **Multi-carrier SDK**: Use the karrio SDK to integrate with custom carrier APIs.
+-   **Fulfil Orders**: Connect carrier accounts, get live rates and purchase shipping labels.
+-   **Tracking**: Create package trackers and get real-time tracking status.
+-   **Dashboard**: Use the karrio dashboard to test and visualize shipping transactions.
+-   **Cloud**: Optimized for deployments using Docker.
+
+**Karrio is not designed as an out-of-the-box shipping software to be used for purposes that differ to the feature scope above.**
+
+In regard to development philosophy, Karrio has a relaxed, open & positive approach. At the end of the day this is free tool developed and maintained by people donating their own free time.
+
+**Get up and running in 1 minute with:**
+
+```sh
+git clone --depth 1 https://github.com/karrioapi/karrio
+cd karrio
+git submodule update --init community
+cd docker
+docker compose up
+```
+
+-   Karrio server accessible at <http://localhost:5002>
+-   Karrio dashboard accessible at <http://localhost:3002>
+
+Default Login: `admin@example.com` | `demo`
+
+<p align="center">
+  <img alt="Shipments Overview" src="screenshots/shipments-overview.png" width="800" style="max-width: 100%;" />
+</p>
+<p align="center">
+  <img alt="Developer Tools" src="screenshots/developer-tools.png" width="800" style="max-width: 100%;" />
+</p>
+
+## Get started
+
+### Quick start demo
+
+[A short video (less than 4 minutes)](https://youtu.be/dFHZosJPaLI) that goes over creating your first label and tracking your first package.
+
+### Open-source hobby deploy (Advanced)
+
+You can deploy a hobby instance in one line on Linux with Docker (recommended 4GB memory):
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/karrioapi/karrio/HEAD/bin/deploy-hobby)"
+```
+
+## The problem: Shipping integration is still painful
+
+-   Lack of documentation.
+-   Multiple and inconsistent APIs.
+-   Difficult access to account and API credentials for development.
+-   Poor developer experience.
+
+## Philosophy
+
+Karrio makes it easy to integrate with shipping carriers and improve your fulfilment processes without losing control.
+
+We believe that the logistics industry can greatly benefit from a unified, open and standardized shipping API that gives you direct access to a network of carriers, control over customers' personal data and **compliance**.
+
+## Benefits
+
+Karrio is the only **platform-focused** open-source developer tool that offers label generation, package tracking, carrier connections management and, document generation APIs that **you can host on your own infrastructure**.
+
+We are an open-source alternative to expensive in-house carrier integration and multi-carrier Saas APIs. We're designed to be more **developer-friendly**, with the fullset of shipping functionalities without vendor-lockin.
+
+### Shipping for platforms
+
+With Karrio, you can extend your platform with native shipping capabilities. Improve merchants and customers' experience on your Marketplace, eCommerce, ERP, WMS, OMS, 3PL and Logistics platform.
+
+With Karrio, 3PLs and large-volume shippers regain control over their shipping tech stack and processes.
+
+### Shipping for retailers
+
+Karrio makes modern shipping accessible to brands, retailers as well as businesses in regulated industries.
+
+When onboarding new carriers, your IT team can meet their requirements in a week or less.
+
+## License
+
+This repository contains both open-source and commercial components, distributed under a dual-license model.
+
+### Open Source (LGPL-3.0)
+
+The following components are licensed under [LGPL-3.0](./LICENSE):
+
+| Component             | Description                          |
+| --------------------- | ------------------------------------ |
+| **Karrio Server**     | Core shipping API server and SDK     |
+| **Community Plugins** | Carrier integrations in `/community` |
+| **Modules**           | Core modules (`/modules/*`)          |
+
+You are free to:
+
+- Use Karrio for any purpose (commercial or non-commercial)
+- Self-host and modify the open-source components
+- Build and distribute carrier plugins and integrations
+- Contribute improvements back to the community
+
+### Enterprise Edition (Karrio EE)
+
+The `/ee` directory contains enterprise-only features under the [Karrio Enterprise License](./LICENSE_EE):
+
+| Feature                | Description                          |
+| ---------------------- | ------------------------------------ |
+| **Multi-tenancy**      | Platform-level tenant isolation      |
+| **Advanced workflows** | Shipping automation and rules engine |
+| **Audit logging**      | Compliance and security tracking     |
+| **SSO/SAML**           | Enterprise authentication            |
+| **Priority support**   | SLA-backed support and services      |
+
+Enterprise features require a valid [Karrio subscription](https://karrio.io/pricing).
+
+### Plugin Development
+
+Carrier plugins and integrations can be developed under permissive licenses (Apache-2.0 or LGPL-3.0). This allows you to:
+
+- Build proprietary carrier connectors
+- Monetize your plugins independently
+- Contribute plugins to the community repository
+
+See our [Plugin Development Guide](https://www.karrio.io/docs/developing/plugin-development) for details.
+
+## MCP Server
+
+Karrio ships with a built-in [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server, letting AI assistants like Claude, Cursor, and Windsurf query rates, purchase labels, track shipments, and manage carriers directly from your IDE or chat interface.
+
+### Quick install
+
+**Claude Desktop / Cursor / Windsurf** — add to your MCP config:
+
+```json
+{
+  "mcpServers": {
+    "karrio": {
+      "command": "npx",
+      "args": ["karrio-mcp"],
+      "env": {
+        "KARRIO_API_KEY": "your_api_key",
+        "KARRIO_API_URL": "https://api.karrio.io"
+      }
+    }
+  }
+}
+```
+
+**Self-hosted instance:**
+
+```json
+{
+  "mcpServers": {
+    "karrio": {
+      "command": "npx",
+      "args": ["karrio-mcp"],
+      "env": {
+        "KARRIO_API_KEY": "your_api_key",
+        "KARRIO_API_URL": "http://localhost:5002"
+      }
+    }
+  }
+}
+```
+
+### What you can do
+
+Once connected, ask your AI assistant things like:
+
+- _"Get me shipping rates from DHL and FedEx for a 2kg package to Germany"_
+- _"Purchase a UPS label for order #1234"_
+- _"Track shipment 1Z999AA10123456784"_
+- _"List my connected carrier accounts"_
+
+→ **[Full MCP server docs and tool reference](https://www.karrio.io/docs/developing/mcp-server)**
+
+## Contributing
+
+We <3 contributions big and small. In priority order (although everything is appreciated) with the most helpful first:
+
+- Ask general question on [Github Discussions](https://github.com/orgs/karrioapi/discussions)
+- Submit a [feature request](https://github.com/orgs/karrioapi/discussions)
+- Review the [Repository Guidelines](https://www.karrio.io/docs/developing/oss-contribution) for project-specific conventions
+- Open a PR (see our instructions on [developing Karrio locally](https://www.karrio.io/docs/developing/local-development))
+
+### Contributors
+
+<a href="https://github.com/karrioapi/karrio/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=karrioapi/karrio" />
+</a>

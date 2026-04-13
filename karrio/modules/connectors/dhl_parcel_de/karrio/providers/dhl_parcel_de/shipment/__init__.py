@@ -1,0 +1,12 @@
+from karrio.providers.dhl_parcel_de.shipment.create import (
+    parse_shipment_response,
+    shipment_request,
+)
+from karrio.providers.dhl_parcel_de.shipment.cancel import (
+    parse_shipment_cancel_response,
+    shipment_cancel_request,
+)
+from karrio.providers.dhl_parcel_de.shipment.return_shipment import (
+    parse_return_shipment_response,
+    return_shipment_request,
+)

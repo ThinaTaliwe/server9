@@ -1,0 +1,712 @@
+/* Import Karrio brand font */
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap");
+
+/* Dark-mode friendly inline badge/label chips (e.g., Accept header chip) */
+.swagger-ui .response-content-type .content-type>label,
+.swagger-ui .response-col_description .response-controls .response-controls-header>label,
+.swagger-ui .opblock .opblock-body label,
+.swagger-ui .model-title__text>label,
+.swagger-ui .parameter__in,
+.swagger-ui .parameter__name .renderedMarkdown p code,
+.swagger-ui .parameter__name code,
+.swagger-ui .response-control-media-type__accept-message,
+.swagger-ui .response-control-media-type__accept-message code,
+.swagger-ui .response-control-media-type__title,
+.swagger-ui .response-control-media-type__title code,
+.swagger-ui .model .property-row__name code {
+    background: rgba(139, 92, 246, 0.12) !important;
+    /* subtle purple tint */
+    color: #e5e7eb !important;
+    /* neutral-200 text */
+    border: 1px solid #4b5563 !important;
+    /* neutral-600 border */
+    border-radius: 6px !important;
+    padding: 2px 6px !important;
+}
+
+/* ==========================================================================
+Swagger UI Custom Styling for Karrio
+========================================================================== */
+
+/* Brand Colors mapped to drawer theme tokens */
+.devtools-theme.dark {
+    --karrio-primary: hsl(var(--primary));
+    --karrio-secondary: #79e5dd;
+    --karrio-accent: #ff4800;
+    --karrio-white: hsl(var(--background));
+    --karrio-light-grey: hsl(var(--card));
+    --karrio-border-grey: hsl(var(--border));
+    --karrio-dark-grey: hsl(var(--foreground));
+    --karrio-blue-grey: #cbd5e1;
+    --karrio-muted-grey: hsl(var(--muted-foreground));
+}
+
+/* Override Swagger UI Container */
+.devtools-theme.dark .swagger-ui {
+    font-family: "Open Sans", sans-serif !important;
+    font-size: 14px;
+    background: var(--karrio-white);
+    color: var(--karrio-dark-grey);
+}
+
+/* Header Styling */
+.swagger-ui .info {
+    margin: 20px 0;
+    padding: 10px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    color: var(--karrio-dark-grey);
+    box-shadow: none;
+}
+
+.swagger-ui .info .title {
+    color: var(--karrio-dark-grey) !important;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.swagger-ui .info .base-url {
+    background: var(--karrio-light-grey) !important;
+    color: var(--karrio-dark-grey) !important;
+    border: 1px solid var(--karrio-border-grey) !important;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-weight: 500;
+    margin-top: 15px;
+}
+
+.swagger-ui .info .description {
+    color: #d1d5db !important;
+    /* neutral-300 */
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin: 15px 0;
+}
+
+/* Ensure playground intro text (markdown) uses neutral-300 */
+.swagger-ui .info .description .markdown,
+.swagger-ui .info .description .markdown p,
+.swagger-ui .info .markdown,
+.swagger-ui .info .markdown p,
+.swagger-ui .info .description p {
+    color: #d1d5db !important;
+    /* neutral-300 */
+}
+
+/* Headings inside the description should be neutral-500 */
+.swagger-ui .info .description h1,
+.swagger-ui .info .description h2,
+.swagger-ui .info .description h3,
+.swagger-ui .info .description h4,
+.swagger-ui .info .description h5,
+.swagger-ui .info .description h6,
+.swagger-ui .info .description .markdown h1,
+.swagger-ui .info .description .markdown h2,
+.swagger-ui .info .description .markdown h3,
+.swagger-ui .info .description .markdown h4,
+.swagger-ui .info .description .markdown h5,
+.swagger-ui .info .description .markdown h6 {
+    color: #a78bfa !important;
+    /* neutral-400 */
+}
+
+/* Version Badge Styling */
+.swagger-ui .info .version {
+    background: var(--karrio-primary) !important;
+    color: white !important;
+    border-radius: 20px !important;
+    padding: 4px 12px !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    margin-left: 15px !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+}
+
+/* Authorization Section - COMPLETELY HIDDEN */
+.swagger-ui .auth-wrapper {
+    display: none !important;
+}
+
+.swagger-ui .auth-btn-wrapper {
+    display: none !important;
+}
+
+.swagger-ui .btn.authorize {
+    display: none !important;
+}
+
+.swagger-ui .auth-container {
+    display: none !important;
+}
+
+.swagger-ui .scheme-container {
+    display: none !important;
+}
+
+.swagger-ui .authorization__btn {
+    display: none !important;
+}
+
+/* Hide any authorization related elements */
+.swagger-ui .topbar .auth-wrapper,
+.swagger-ui .topbar .authorization__btn,
+.swagger-ui .auth-btn-wrapper,
+.swagger-ui .authorize-wrapper {
+    display: none !important;
+}
+
+/* Hide the last opblock-tag-section (Reference & Enums) */
+.swagger-ui .opblock-tag-section:last-child {
+    display: none !important;
+}
+
+/* Tag Section Layout: Move description to new line below title */
+.swagger-ui .opblock-tag {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    border-bottom: none !important;
+}
+
+.swagger-ui .opblock-tag small {
+    padding-left: 0 !important;
+}
+
+.swagger-ui .opblock-tag .opblock-tag-section-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    width: 100% !important;
+}
+
+.swagger-ui .opblock-tag .opblock-tag-section-header .opblock-tag-section-header-a {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+}
+
+.swagger-ui .opblock-tag .opblock-tag-section-header-a h4 {
+    margin-bottom: 8px !important;
+    font-size: 1.5rem !important;
+    font-weight: 600 !important;
+    color: #ffffff !important;
+    margin-top: 0 !important;
+}
+
+.swagger-ui .opblock-tag .opblock-tag-section-header-a p,
+.swagger-ui .opblock-tag .opblock-tag-section-header-a small,
+.swagger-ui .opblock-tag .opblock-tag-section-header-a .markdown {
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 1rem !important;
+    color: #e5e7eb !important;
+    line-height: 1.5 !important;
+    font-weight: 400 !important;
+    max-width: 100% !important;
+}
+
+/* Ensure collapsible tag titles (API, Auth) and descriptions are colored even if class differs */
+.swagger-ui .opblock-tag .opblock-tag-section-header h4 {
+    color: #ffffff !important;
+}
+
+.swagger-ui .opblock-tag .opblock-tag-section-header p,
+.swagger-ui .opblock-tag .opblock-tag-section-header small,
+.swagger-ui .opblock-tag .opblock-tag-section-header .markdown {
+    color: #e5e7eb !important;
+    /* neutral-200 */
+}
+
+/* Broader tag header targeting (API/Auth titles and descriptions) */
+.swagger-ui .opblock-tag a,
+.swagger-ui .opblock-tag a span,
+.swagger-ui .opblock-tag h3,
+.swagger-ui .opblock-tag h4 {
+    color: #ffffff !important;
+}
+
+.swagger-ui .opblock-tag small,
+.swagger-ui .opblock-tag p,
+.swagger-ui .opblock-tag .markdown {
+    color: #e5e7eb !important;
+    /* neutral-200 */
+}
+
+/* Collapsible arrow icon color */
+.swagger-ui .opblock-tag .opblock-tag-section-header svg,
+.swagger-ui .opblock-tag .opblock-tag-section-header-a svg {
+    fill: #525252 !important;
+    /* neutral-600 */
+    stroke: #525252 !important;
+}
+
+/* Also target nested shapes and expand/collapse controls */
+.swagger-ui .opblock-tag .opblock-tag-section-header svg path,
+.swagger-ui .opblock-tag .opblock-tag-section-header svg polygon,
+.swagger-ui .opblock-tag .opblock-tag-section-header-a svg path,
+.swagger-ui .opblock-tag .opblock-tag-section-header-a svg polygon,
+.swagger-ui .opblock-tag .expand-operation svg,
+.swagger-ui .opblock-tag .expand-operation svg path,
+.swagger-ui .opblock-tag .expand-operation svg polygon,
+.swagger-ui .opblock-tag .expand-operation {
+    color: #525252 !important;
+    /* neutral-600 */
+    fill: #525252 !important;
+    stroke: #525252 !important;
+}
+
+/* Improve the overall tag section appearance */
+.swagger-ui .opblock-tag-section {
+    padding: 10px !important;
+    margin: 10px 0 !important;
+    border: 1px solid #a3a3a3 !important;
+    /* neutral-400 */
+    border-radius: 8px !important;
+    background: var(--karrio-light-grey) !important;
+    box-shadow: none !important;
+    transition: background 0.3s ease !important;
+}
+
+.swagger-ui .opblock-tag-section:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06) !important;
+}
+
+.swagger-ui .opblock-tag-section:last-child {
+    border-bottom: none !important;
+}
+
+/* Operations Styling */
+.swagger-ui .opblock {
+    border: 1px solid var(--karrio-border-grey);
+    border-radius: 8px;
+    margin: 15px 0;
+    box-shadow: none;
+    background: var(--karrio-light-grey);
+    transition: all 0.3s ease;
+}
+
+.swagger-ui .opblock:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.swagger-ui .opblock.opblock-post {
+    border-color: #caffba;
+}
+
+.swagger-ui .opblock.opblock-post .opblock-summary {
+    border-color: #caffba;
+}
+
+.swagger-ui .opblock.opblock-get {
+    border-color: var(--karrio-secondary);
+}
+
+.swagger-ui .opblock.opblock-get .opblock-summary {
+    border-color: var(--karrio-secondary);
+}
+
+.swagger-ui .opblock.opblock-put {
+    border-color: #ffd88f;
+}
+
+.swagger-ui .opblock.opblock-put .opblock-summary {
+    border-color: #ffd88f;
+}
+
+.swagger-ui .opblock.opblock-delete {
+    border-color: #fc354c;
+}
+
+.swagger-ui .opblock.opblock-delete .opblock-summary {
+    border-color: #fc354c;
+}
+
+/* HTTP Method Tags */
+.swagger-ui .opblock .opblock-summary-method {
+    font-weight: 700;
+    border-radius: 4px;
+    padding: 6px 12px;
+    margin-right: 15px;
+    min-width: 80px;
+    text-align: center;
+}
+
+/* Operation Summaries */
+.swagger-ui .opblock-summary {
+    padding: 15px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.swagger-ui .opblock-summary:hover {
+    background: rgba(139, 92, 246, 0.08);
+}
+
+.swagger-ui .opblock .opblock-summary .opblock-summary-path {
+    font-weight: 600;
+    color: #a3a3a3 !important;
+    /* neutral-400 */
+}
+
+.swagger-ui .opblock .opblock-summary .opblock-summary-description {
+    color: #a3a3a3 !important;
+    /* neutral-400 */
+    font-weight: 400;
+}
+
+/* Fallback: color the summary container text itself */
+.swagger-ui .opblock .opblock-summary {
+    color: #a3a3a3 !important;
+    /* neutral-400 */
+}
+
+/* Expanded operation content: set text to neutral-400 */
+.swagger-ui .opblock .opblock-body,
+.swagger-ui .opblock .opblock-section,
+.swagger-ui .opblock .opblock-description-wrapper,
+.swagger-ui .opblock .parameters,
+.swagger-ui .opblock .responses-wrapper,
+.swagger-ui .opblock .responses-inner {
+    color: #a3a3a3 !important;
+    /* neutral-400 */
+}
+
+/* Ensure all nested text inside expanded operations inherits neutral-400 */
+.swagger-ui .opblock .opblock-body p,
+.swagger-ui .opblock .opblock-body li,
+.swagger-ui .opblock .opblock-body span,
+.swagger-ui .opblock .opblock-body code,
+.swagger-ui .opblock .opblock-body pre,
+.swagger-ui .opblock .opblock-body td,
+.swagger-ui .opblock .opblock-body th,
+.swagger-ui .opblock .opblock-body small,
+.swagger-ui .opblock .opblock-body div,
+.swagger-ui .opblock .opblock-body a {
+    color: #a3a3a3 !important;
+}
+
+/* Remove light gray blocks inside expanded operations */
+.swagger-ui .opblock .opblock-section,
+.swagger-ui .opblock .opblock-description-wrapper,
+.swagger-ui .opblock .responses-inner,
+.swagger-ui .opblock .parameters,
+.swagger-ui .opblock table,
+.swagger-ui .opblock table tr,
+.swagger-ui .opblock table td,
+.swagger-ui .opblock table th,
+.swagger-ui .model,
+.swagger-ui .model-container {
+    background: transparent !important;
+}
+
+/* Also clear content tabs and meta bars */
+.swagger-ui .opblock .tab,
+.swagger-ui .opblock .content-type,
+.swagger-ui .opblock .response-meta {
+    background: transparent !important;
+    color: #a3a3a3 !important;
+}
+
+/* Tame table borders to dark theme */
+.swagger-ui .opblock table,
+.swagger-ui .opblock table td,
+.swagger-ui .opblock table th {
+    border-color: #262626 !important;
+    /* neutral-800 */
+}
+
+/* Operation expand/collapse arrow icons (POST/GET/etc) */
+.swagger-ui .opblock .opblock-summary svg,
+.swagger-ui .opblock .opblock-summary svg path,
+.swagger-ui .opblock .opblock-summary svg polygon,
+.swagger-ui .opblock .opblock-summary .expand-operation,
+.swagger-ui .opblock .opblock-summary .expand-operation svg,
+.swagger-ui .opblock .opblock-summary .expand-operation svg path,
+.swagger-ui .opblock .opblock-summary-control svg,
+.swagger-ui .opblock .opblock-summary-control svg path,
+.swagger-ui .opblock .opblock-summary-control svg polygon {
+    color: #525252 !important;
+    /* neutral-600 */
+    fill: #525252 !important;
+    stroke: #525252 !important;
+}
+
+/* Parameters and Responses */
+.swagger-ui .parameters-container {
+    background: #111827 !important;
+    /* neutral-900 solid */
+    border: 1px solid #262626 !important;
+    /* neutral-800 */
+    /* neutral-800 */
+    border-radius: 6px;
+    padding: 20px;
+    margin: 15px 0;
+}
+
+.swagger-ui .responses-wrapper {
+    background: #111827 !important;
+    /* neutral-900 solid */
+    border: 1px solid #262626 !important;
+    /* neutral-800 */
+    /* neutral-800 */
+    border-radius: 6px;
+    padding: 20px;
+    margin: 15px 0;
+}
+
+/* Try it out button */
+.swagger-ui .btn.try-out__btn {
+    background: var(--karrio-secondary) !important;
+    border-color: var(--karrio-secondary) !important;
+    color: #374151 !important;
+    /* neutral-700 - dark grey text */
+    font-weight: 600;
+    border-radius: 4px;
+    padding: 8px 16px;
+}
+
+.swagger-ui .btn.try-out__btn:hover {
+    background: var(--karrio-primary) !important;
+    border-color: var(--karrio-primary) !important;
+    color: #374151 !important;
+    /* keep text dark on hover */
+}
+
+/* Execute button */
+.swagger-ui .btn.execute {
+    background: var(--karrio-accent) !important;
+    border-color: var(--karrio-accent) !important;
+    color: white !important;
+    font-weight: 600;
+    border-radius: 4px;
+    padding: 12px 24px;
+    font-size: 1rem;
+}
+
+.swagger-ui .btn.execute:hover {
+    background: #e04000 !important;
+    border-color: #e04000 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 72, 0, 0.3);
+}
+
+/* Clear button */
+.swagger-ui .btn.btn-clear {
+    background: transparent !important;
+    border-color: var(--karrio-muted-grey) !important;
+    color: var(--karrio-muted-grey) !important;
+}
+
+/* Models Section */
+.swagger-ui .models {
+    border: 1px solid var(--karrio-border-grey);
+    border-radius: 8px;
+    background: var(--karrio-white);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.swagger-ui .model-container {
+    background: rgba(239, 244, 247, 0.3);
+    border-radius: 6px;
+    margin: 10px 0;
+}
+
+/* HIDE MODELS/SCHEMA SECTION COMPLETELY */
+.swagger-ui .models,
+.swagger-ui .model-container,
+.swagger-ui .model,
+.swagger-ui .model-title,
+.swagger-ui .models-control,
+.swagger-ui .section.models,
+.swagger-ui .scheme-container,
+.swagger-ui .models.is-open {
+    display: none !important;
+}
+
+/* Hide any remaining schema-related elements */
+.swagger-ui div[id*="model"],
+.swagger-ui .model-box,
+.swagger-ui .model-box-control,
+.swagger-ui .models-control-wrap {
+    display: none !important;
+}
+
+/* Input fields */
+.swagger-ui input[type="text"],
+.swagger-ui input[type="password"],
+.swagger-ui input[type="email"],
+.swagger-ui textarea,
+.swagger-ui select {
+    background: transparent !important;
+    color: var(--karrio-dark-grey) !important;
+    border: 2px solid var(--karrio-primary) !important;
+    border-radius: 4px !important;
+    padding: 8px 12px !important;
+    font-family: "Open Sans", sans-serif !important;
+    transition: border-color 0.3s ease;
+}
+
+.swagger-ui input[type="text"]:focus,
+.swagger-ui input[type="password"]:focus,
+.swagger-ui input[type="email"]:focus,
+.swagger-ui textarea:focus,
+.swagger-ui select:focus {
+    border-color: var(--karrio-primary) !important;
+    box-shadow: 0 0 0 3px rgba(87, 34, 204, 0.1) !important;
+}
+
+/* Response section */
+.swagger-ui .responses-inner {
+    background: #111827 !important;
+    /* neutral-900 solid */
+    border: 1px solid #262626 !important;
+    /* neutral-800 */
+    /* neutral-800 */
+    border-radius: 6px;
+    padding: 15px;
+}
+
+/* Section header bars inside operation blocks */
+.swagger-ui .opblock-section-header,
+.swagger-ui .opblock-section-header h4,
+.swagger-ui .opblock-section-header label {
+    background: #111827 !important;
+    /* neutral-900 */
+    color: #e5e7eb !important;
+    /* neutral-200 */
+}
+
+/* Ensure readable text on dark blocks */
+.swagger-ui .parameters-container *,
+.swagger-ui .responses-wrapper *,
+.swagger-ui .responses-inner * {
+    color: #e5e7eb !important;
+    /* neutral-200 */
+}
+
+/* Make section header titles (e.g., "Parameters") a lighter grey for readability */
+.swagger-ui .opblock-section-header h4,
+.swagger-ui .opblock-section-header h4 span,
+.swagger-ui .opblock-section-header h4 a {
+    color: #f3f4f6 !important;
+    /* neutral-100 */
+}
+
+/* Ensure Parameters header text uses lighter grey across structures */
+.swagger-ui .opblock .parameters .opblock-section-header h4,
+.swagger-ui .opblock .parameters .opblock-section-header h4 span,
+.swagger-ui .opblock .parameters .opblock-section-header label {
+    color: #f3f4f6 !important;
+    /* neutral-100 */
+}
+
+/* Explicitly target SwaggerUI h4.opblock-title within tab-header hierarchy */
+.swagger-ui .opblock-section-header .tab-header h4.opblock-title,
+.swagger-ui .opblock-section-header .tab-header h4.opblock-title span {
+    color: #f3f4f6 !important;
+    /* neutral-100 */
+}
+
+.swagger-ui .response-col_status {
+    font-weight: 700;
+}
+
+/* Code blocks */
+.swagger-ui .highlight-code {
+    background: var(--karrio-light-grey) !important;
+    color: var(--karrio-dark-grey) !important;
+    border-radius: 6px;
+    padding: 15px;
+    font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+}
+
+/* Keep rendered JSON/code text purple for emphasis */
+/* Reset code text color to default */
+.swagger-ui .highlight-code pre,
+.swagger-ui .highlight-code code {
+    color: inherit !important;
+}
+
+/* Schema styles */
+.swagger-ui .model {
+    background: rgba(239, 244, 247, 0.5);
+    border: 1px solid var(--karrio-border-grey);
+    border-radius: 6px;
+    padding: 15px;
+}
+
+/* Top bar styling */
+.swagger-ui .topbar {
+    background: var(--karrio-primary);
+    padding: 15px 0;
+    border-bottom: 3px solid var(--karrio-secondary);
+}
+
+.swagger-ui .topbar .download-url-wrapper {
+    display: none;
+    /* Hide the default URL input */
+}
+
+/* Loading animation */
+.swagger-ui .loading-container {
+    background: var(--karrio-white);
+    color: var(--karrio-primary);
+}
+
+/* Scrollbar styling */
+.devtools-theme.dark .swagger-ui ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.devtools-theme.dark .swagger-ui ::-webkit-scrollbar-track {
+    background: var(--karrio-light-grey);
+    border-radius: 4px;
+}
+
+.devtools-theme.dark .swagger-ui ::-webkit-scrollbar-thumb {
+    background: var(--karrio-muted-grey);
+    border-radius: 4px;
+}
+
+.devtools-theme.dark .swagger-ui ::-webkit-scrollbar-thumb:hover {
+    background: var(--karrio-primary);
+}
+
+/* Custom container styling */
+.devtools-theme.dark .swagger-ui-container {
+    max-width: 1500px;
+    margin: 0 auto;
+    background: transparent;
+    min-height: 100%;
+    padding: 0;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+    .swagger-ui .info {
+        padding: 20px;
+        margin: 10px 0;
+    }
+
+    .swagger-ui .info .title {
+        font-size: 2rem;
+    }
+
+    .swagger-ui .opblock {
+        margin: 10px 0;
+    }
+
+    .swagger-ui .opblock-summary {
+        padding: 12px 15px;
+    }
+
+    .swagger-ui .opblock-summary-method {
+        min-width: 60px;
+        margin-right: 10px;
+    }
+}

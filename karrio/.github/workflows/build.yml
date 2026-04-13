@@ -1,0 +1,207 @@
+name: karrio-build
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.changes.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            version:
+              - 'apps/api/karrio/server/VERSION'
+
+  python-packages:
+    # This job builds and releases all Python packages, including:
+    # - modules/
+    # - modules/connectors/
+    # - apps/api/
+    # - community/plugins/
+    # - plugins/
+    # Any subfolder with a pyproject.toml will be processed.
+    # See bin/build-and-release-packages for details.
+    needs: changes
+    if: ${{ needs.changes.outputs.version == 'true' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout submodules
+        run: |
+          # Only clone the community submodule which is public and needed for the build
+          git submodule update --init community
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+
+      - id: get_tag
+        run: |
+          cat ./apps/api/karrio/server/VERSION
+          echo "tag=$(cat ./apps/api/karrio/server/VERSION)" >> "$GITHUB_ENV"
+
+      - name: Build Python packages
+        run: |
+          echo 'Building Python packages for version ${{ env.tag }}...'
+          ./bin/build-and-release-packages --build-only --force
+
+      - name: Publish Python packages to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: .venv/dist/
+          skip-existing: true
+          password: ${{ secrets.PYPI_ACCESS_TOKEN || '' }}
+
+  server-build:
+    needs: changes
+    if: ${{ needs.changes.outputs.version == 'true' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    env:
+      DOCKER_BUILDKIT: 1
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout submodules
+        run: |
+          # Only clone the community submodule which is public and needed for the build
+          git submodule update --init community
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - id: get_tag
+        run: |
+          cat ./apps/api/karrio/server/VERSION
+          echo "tag=$(cat ./apps/api/karrio/server/VERSION)" >> "$GITHUB_ENV"
+
+      - name: Build JS client
+        run: |
+          # Generate TypeScript fetch client from OpenAPI schema
+          docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli generate \
+            -i /local/schemas/openapi.yml \
+            -g typescript-fetch \
+            -o /local/packages/karriojs/api/generated \
+            --additional-properties=typescriptThreePlus=true \
+            --additional-properties=modelPropertyNaming=snake_case \
+            --additional-properties=useSingleRequestParameter=true
+
+          # Build browser JS bundle
+          cd packages/karriojs
+          npm install
+          npx gulp build --output "${GITHUB_WORKSPACE}/apps/api/karrio/server/static/karrio/js/karrio.js"
+          cd -
+
+      - name: Build embeddable elements
+        run: |
+          cd packages/elements
+          npm install
+          npm run build
+
+          # Copy built elements to Django static directory
+          ELEMENTS_STATIC="${GITHUB_WORKSPACE}/apps/api/karrio/server/static/karrio/elements"
+          mkdir -p "${ELEMENTS_STATIC}" "${ELEMENTS_STATIC}/chunks"
+          cp dist/elements.js dist/globals.css "${ELEMENTS_STATIC}/"
+          cp dist/ratesheet.js dist/ratesheet.html "${ELEMENTS_STATIC}/"
+          cp dist/devtools.js dist/devtools.css dist/devtools.html "${ELEMENTS_STATIC}/"
+          cp dist/template-editor.js dist/template-editor.html "${ELEMENTS_STATIC}/"
+          cp dist/connections.js dist/connections.html "${ELEMENTS_STATIC}/"
+          [ -d dist/chunks ] && cp dist/chunks/* "${ELEMENTS_STATIC}/chunks/"
+          cd -
+
+      - name: Build karrio server image
+        run: |
+          echo 'Building karrio server:${{ env.tag }}...'
+          ls -l ./modules/connectors 2>/dev/null || true
+          ls -l ./community/plugins 2>/dev/null || true
+          ls -l ./modules 2>/dev/null || true
+          ./bin/build-server-image-from-source ${{ env.tag }}
+
+      - name: Push karrio server image
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+          echo 'Pushing karrio server:${{ env.tag }}...'
+          docker push karrio/server:${{ env.tag }}
+          docker tag karrio/server:${{ env.tag }} karrio/server:latest-rc
+          docker push karrio/server:latest-rc
+
+  dashboard-build:
+    needs: changes
+    if: ${{ needs.changes.outputs.version == 'true' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    env:
+      DOCKER_BUILDKIT: 1
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: get_tag
+        run: |
+          cat ./apps/api/karrio/server/VERSION
+          echo "tag=$(cat ./apps/api/karrio/server/VERSION)" >> "$GITHUB_ENV"
+
+      - name: Build karrio dashboard image
+        run: |
+          echo 'Building karrio dashboard:${{ env.tag }}...'
+          ./bin/build-dashboard-image ${{ env.tag }}
+
+      - name: Push karrio dashboard image
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+          echo 'Pushing karrio dashboard:${{ env.tag }}...'
+          docker push karrio/dashboard:${{ env.tag }}
+          docker tag karrio/dashboard:${{ env.tag }} karrio/dashboard:latest-rc
+          docker push karrio/dashboard:latest-rc
+
+  create-release:
+    # Create a GitHub release after all builds complete successfully
+    # This job is idempotent - it will skip if the release already exists
+    needs: [python-packages, server-build, dashboard-build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: get_tag
+        run: |
+          cat ./apps/api/karrio/server/VERSION
+          echo "tag=$(cat ./apps/api/karrio/server/VERSION)" >> "$GITHUB_ENV"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MARK_LATEST: "1"
+        run: |
+          echo 'Creating GitHub release for version ${{ env.tag }}...'
+          ./bin/create-github-release ${{ env.tag }}

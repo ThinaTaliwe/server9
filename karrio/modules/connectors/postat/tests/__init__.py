@@ -1,0 +1,1 @@
+from tests.postat.test_shipment import *

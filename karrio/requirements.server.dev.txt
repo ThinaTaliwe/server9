@@ -1,0 +1,19 @@
+# Server dev dependencies
+django-debug-toolbar
+djangorestframework-stubs
+
+# Karrio dev packages
+-r requirements.sdk.dev.txt
+
+# karrio server modules
+-e ./modules/core
+-e ./apps/api
+-e ./modules/graph
+-e ./modules/data
+-e ./modules/events
+-e ./modules/manager
+-e ./modules/orders
+-e ./modules/proxy
+-e ./modules/pricing
+-e ./modules/documents
+-e ./modules/admin

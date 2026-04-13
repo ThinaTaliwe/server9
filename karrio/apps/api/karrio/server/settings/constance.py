@@ -1,0 +1,243 @@
+"""Dynamic configuration editable on runtime powered by django-constance."""
+
+from decouple import config
+import karrio.references as ref
+import karrio.server.settings.base as base
+from karrio.server.settings.email import (
+    EMAIL_USE_TLS,
+    EMAIL_HOST_USER,
+    EMAIL_HOST_PASSWORD,
+    EMAIL_HOST,
+    EMAIL_PORT,
+    EMAIL_FROM_ADDRESS,
+)
+import importlib.util
+
+CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
+CONSTANCE_DATABASE_PREFIX = "constance:core:"
+
+DATA_ARCHIVING_SCHEDULE = config("DATA_ARCHIVING_SCHEDULE", default=168, cast=int)
+
+GOOGLE_CLOUD_API_KEY = config("GOOGLE_CLOUD_API_KEY", default="")
+CANADAPOST_ADDRESS_COMPLETE_API_KEY = config(
+    "CANADAPOST_ADDRESS_COMPLETE_API_KEY", default=""
+)
+
+# data retention env in days
+ORDER_DATA_RETENTION = config("ORDER_DATA_RETENTION", default=183, cast=int)
+TRACKER_DATA_RETENTION = config("TRACKER_DATA_RETENTION", default=183, cast=int)
+SHIPMENT_DATA_RETENTION = config("SHIPMENT_DATA_RETENTION", default=183, cast=int)
+API_LOGS_DATA_RETENTION = config("API_LOGS_DATA_RETENTION", default=92, cast=int)
+
+# background tracking max active age
+TRACKER_MAX_ACTIVE_DAYS = config("TRACKER_MAX_ACTIVE_DAYS", default=90, cast=int)
+
+# registry config
+ENABLE_ALL_PLUGINS_BY_DEFAULT = config(
+    "ENABLE_ALL_PLUGINS_BY_DEFAULT", default=True if base.DEBUG else False, cast=bool
+)
+
+# Feature flags config — always present with False default when module is absent
+FEATURE_FLAGS_CONFIG = {
+    "AUDIT_LOGGING": (
+        base.AUDIT_LOGGING if importlib.util.find_spec("karrio.server.audit") is not None else False,
+        "Audit logging",
+        bool,
+    ),
+    "ALLOW_SIGNUP": (
+        base.ALLOW_SIGNUP,
+        "Allow signup",
+        bool,
+    ),
+    "ALLOW_ADMIN_APPROVED_SIGNUP": (
+        base.ALLOW_ADMIN_APPROVED_SIGNUP,
+        "Allow admin approved signup",
+        bool,
+    ),
+    "ALLOW_MULTI_ACCOUNT": (
+        base.ALLOW_MULTI_ACCOUNT,
+        "Allow multi account",
+        bool,
+    ),
+    "ADMIN_DASHBOARD": (
+        base.ADMIN_DASHBOARD if importlib.util.find_spec("karrio.server.admin") is not None else False,
+        "Admin dashboard",
+        bool,
+    ),
+    "MULTI_ORGANIZATIONS": (
+        base.MULTI_ORGANIZATIONS if importlib.util.find_spec("karrio.server.orgs") is not None else False,
+        "Multi organizations",
+        bool,
+    ),
+    "ORDERS_MANAGEMENT": (
+        base.ORDERS_MANAGEMENT if importlib.util.find_spec("karrio.server.orders") is not None else False,
+        "Orders management",
+        bool,
+    ),
+    "APPS_MANAGEMENT": (
+        base.APPS_MANAGEMENT if importlib.util.find_spec("karrio.server.apps") is not None else False,
+        "Apps management",
+        bool,
+    ),
+    "DOCUMENTS_MANAGEMENT": (
+        base.DOCUMENTS_MANAGEMENT if importlib.util.find_spec("karrio.server.documents") is not None else False,
+        "Documents management",
+        bool,
+    ),
+    "DATA_IMPORT_EXPORT": (
+        base.DATA_IMPORT_EXPORT if importlib.util.find_spec("karrio.server.data") is not None else False,
+        "Data import export",
+        bool,
+    ),
+    "WORKFLOW_MANAGEMENT": (
+        base.WORKFLOW_MANAGEMENT if importlib.util.find_spec("karrio.server.automation") is not None else False,
+        "Workflow management",
+        bool,
+    ),
+    "SHIPPING_RULES": (
+        base.SHIPPING_RULES if importlib.util.find_spec("karrio.server.automation") is not None else False,
+        "Shipping rules",
+        bool,
+    ),
+    "SHIPPING_METHODS": (
+        base.SHIPPING_METHODS if importlib.util.find_spec("karrio.server.shipping") is not None else False,
+        "Shipping methods",
+        bool,
+    ),
+    "ADVANCED_ANALYTICS": (
+        base.ADVANCED_ANALYTICS if importlib.util.find_spec("karrio.server.analytics") is not None else False,
+        "Advanced analytics",
+        bool,
+    ),
+    "PERSIST_SDK_TRACING": (
+        base.PERSIST_SDK_TRACING,
+        "Persist SDK tracing",
+        bool,
+    ),
+}
+
+# Update fieldsets to only include existing feature flags
+FEATURE_FLAGS_FIELDSET = list(FEATURE_FLAGS_CONFIG.keys())
+
+# Plugin registry
+ref.collect_failed_plugins_data()
+PLUGIN_REGISTRY = {
+    "ENABLE_ALL_PLUGINS_BY_DEFAULT": (
+        ENABLE_ALL_PLUGINS_BY_DEFAULT,
+        "Enable all plugins by default",
+        bool,
+    ),
+    **{
+        f"{ext.upper()}_ENABLED": (
+            config(f"{ext.upper()}_ENABLED", default=True, cast=bool),
+            f"{metadata.get('label')} plugin",
+            bool,
+        )
+        for ext, metadata in ref.PLUGIN_METADATA.items()
+    },
+}
+
+# Collect plugin system configs from ref.SYSTEM_CONFIGS
+# Format: Dict[str, Tuple[default_value, description, type]]
+PLUGIN_SYSTEM_CONFIG = {
+    key: (config(key, default=default_value, cast=value_type), description, value_type)
+    for key, (default_value, description, value_type) in ref.SYSTEM_CONFIGS.items()
+}
+PLUGIN_SYSTEM_CONFIG_FIELDSETS = {
+    f"{metadata.get('label')} Config": tuple(metadata.get("system_config", {}).keys())
+    for _, metadata in ref.PLUGIN_METADATA.items()
+    if metadata.get("system_config")
+}
+
+
+# Aggregate all config sections into CONSTANCE_CONFIG
+CONSTANCE_CONFIG = {
+    "EMAIL_USE_TLS": (
+        EMAIL_USE_TLS,
+        "Determine whether the configuration support TLS",
+        bool,
+    ),
+    "EMAIL_HOST_USER": (
+        EMAIL_HOST_USER,
+        "The authentication user (email). e.g: admin@karrio.io",
+        str,
+    ),
+    "EMAIL_HOST_PASSWORD": (EMAIL_HOST_PASSWORD, "The authentication password", str),
+    "EMAIL_HOST": (EMAIL_HOST, "The mail server host. e.g: smtp.gmail.com", str),
+    "EMAIL_PORT": (
+        EMAIL_PORT,
+        "The mail server port. e.g: 465 (SSL required) or 587 (TLS required)",
+        int,
+    ),
+    "EMAIL_FROM_ADDRESS": (
+        EMAIL_FROM_ADDRESS,
+        "Email sent from. e.g: noreply@karrio.io",
+        str,
+    ),
+    "GOOGLE_CLOUD_API_KEY": (GOOGLE_CLOUD_API_KEY, "A Google GeoCoding API key", str),
+    "CANADAPOST_ADDRESS_COMPLETE_API_KEY": (
+        CANADAPOST_ADDRESS_COMPLETE_API_KEY,
+        "The Canada Post AddressComplete service API Key",
+        str,
+    ),
+    "ORDER_DATA_RETENTION": (
+        ORDER_DATA_RETENTION,
+        "Order data retention period (in days)",
+        int,
+    ),
+    "TRACKER_DATA_RETENTION": (
+        TRACKER_DATA_RETENTION,
+        "Trackers data retention period (in days)",
+        int,
+    ),
+    "SHIPMENT_DATA_RETENTION": (
+        SHIPMENT_DATA_RETENTION,
+        "Shipment data retention period (in days)",
+        int,
+    ),
+    "API_LOGS_DATA_RETENTION": (
+        API_LOGS_DATA_RETENTION,
+        "API request and SDK tracing logs retention period (in days)",
+        int,
+    ),
+    "TRACKER_MAX_ACTIVE_DAYS": (
+        TRACKER_MAX_ACTIVE_DAYS,
+        "Maximum age (in days) for active background tracking. Trackers created more than this many days ago will be retired from polling and their status set to 'unknown'.",
+        int,
+    ),
+    **FEATURE_FLAGS_CONFIG,
+    **PLUGIN_REGISTRY,
+    **PLUGIN_SYSTEM_CONFIG,
+}
+
+CONSTANCE_CONFIG_FIELDSETS = {
+    "Email Config": (
+        "EMAIL_USE_TLS",
+        "EMAIL_HOST_USER",
+        "EMAIL_HOST_PASSWORD",
+        "EMAIL_HOST",
+        "EMAIL_PORT",
+        "EMAIL_FROM_ADDRESS",
+    ),
+    "Address Validation Service": (
+        "GOOGLE_CLOUD_API_KEY",
+        "CANADAPOST_ADDRESS_COMPLETE_API_KEY",
+    ),
+    "Data Retention": (
+        "ORDER_DATA_RETENTION",
+        "TRACKER_DATA_RETENTION",
+        "SHIPMENT_DATA_RETENTION",
+        "API_LOGS_DATA_RETENTION",
+        "TRACKER_MAX_ACTIVE_DAYS",
+    ),
+    "Feature Flags": tuple(FEATURE_FLAGS_FIELDSET),
+    "Registry Config": ("ENABLE_ALL_PLUGINS_BY_DEFAULT",),
+    "Registry Plugins": tuple(
+        [
+            k
+            for k in PLUGIN_REGISTRY.keys()
+            if not k in ("ENABLE_ALL_PLUGINS_BY_DEFAULT",)
+        ]
+    ),
+    **PLUGIN_SYSTEM_CONFIG_FIELDSETS,
+}

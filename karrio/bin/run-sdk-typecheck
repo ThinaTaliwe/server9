@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+# Activate python env
+source "bin/activate-env" > /dev/null 2>&1
+
+echo "running sdk typecheck with mypy (parallel)"
+
+# SDK core submodules — run first (fast, sequential)
+for submodule in $(find "modules/sdk" -type f -name "__init__.py" ! -path "*tests*" ! -path "*schemas*" -exec dirname '{}' \;); do
+    mypy ${submodule} || exit $?
+done
+
+# Connector submodules — run in parallel (independent, no shared state)
+run_connector_typecheck() {
+    module="$1"
+    for submodule in $(find "${module}" -type f -name "__init__.py" ! -path "*tests*" ! -path "*schemas*" -exec dirname '{}' \;); do
+        mypy ${submodule} || exit 255
+    done
+}
+export -f run_connector_typecheck
+
+packages=$(find "modules/connectors" -type f -name "setup.py" -exec dirname '{}' \;)
+echo "$packages" | xargs -P 8 -I{} bash -c 'run_connector_typecheck "$@"' _ {} || exit 1
+
+echo "typecheck complete"

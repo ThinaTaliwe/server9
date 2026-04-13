@@ -1,0 +1,8 @@
+bandit
+black
+coverage
+lxml-stubs
+mypy
+twine
+wheel
+setuptools

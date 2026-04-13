@@ -1,0 +1,231 @@
+from django.urls import path
+from rest_framework import status
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.response import Response
+from rest_framework.request import Request
+from django_filters.rest_framework import DjangoFilterBackend
+
+from karrio.server.core.logging import logger
+from karrio.server.core.views.api import GenericAPIView, APIView
+from karrio.server.core.filters import PickupFilters
+from karrio.server.manager.router import router
+from karrio.server.core.serializers import PickupStatus
+from karrio.server.manager.serializers import (
+    PaginatedResult,
+    Pickup,
+    ErrorResponse,
+    ErrorMessages,
+    PickupData,
+    PickupUpdateData,
+    PickupCancelData,
+    can_mutate_pickup,
+)
+import karrio.server.manager.models as models
+import karrio.server.openapi as openapi
+
+ENDPOINT_ID = "$$$$"  # This endpoint id is used to make operation ids unique make sure not to duplicate
+Pickups = PaginatedResult("PickupList", Pickup)
+
+
+class PickupList(GenericAPIView):
+    pagination_class = type(
+        "CustomPagination", (LimitOffsetPagination,), dict(default_limit=20)
+    )
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = PickupFilters
+    serializer_class = Pickups
+    model = models.Pickup
+    throttle_scope = "carrier_request"
+
+    @openapi.extend_schema(
+        tags=["Pickups"],
+        operation_id=f"{ENDPOINT_ID}list",
+        extensions={"x-operationId": "listPickups"},
+        summary="List shipment pickups",
+        responses={
+            200: Pickups(),
+            404: ErrorResponse(),
+            500: ErrorResponse(),
+        },
+        parameters=PickupFilters.parameters,
+    )
+    def get(self, request: Request):
+        """
+        Retrieve all scheduled pickups.
+        """
+        pickups = self.filter_queryset(self.get_queryset())
+        response = self.paginate_queryset(Pickup(pickups, many=True).data)
+        return self.get_paginated_response(response)
+
+    @openapi.extend_schema(
+        tags=["Pickups"],
+        operation_id=f"{ENDPOINT_ID}create",
+        extensions={"x-operationId": "createPickup"},
+        summary="Schedule a pickup",
+        responses={
+            201: Pickup(),
+            400: ErrorResponse(),
+            424: ErrorMessages(),
+            500: ErrorResponse(),
+        },
+        request=PickupData(),
+    )
+    def post(self, request: Request):
+        """
+        Schedule a pickup for one or many shipments with labels already purchased.
+
+        The carrier is identified by `carrier_code` in the request body.
+        Use `options.connection_id` to target a specific carrier connection.
+        """
+        pickup = (
+            PickupData.map(data=request.data, context=request)
+            .save()
+            .instance
+        )
+
+        return Response(Pickup(pickup).data, status=status.HTTP_201_CREATED)
+
+
+class PickupRequest(APIView):
+    throttle_scope = "carrier_request"
+
+    @openapi.extend_schema(
+        tags=["Pickups"],
+        operation_id=f"{ENDPOINT_ID}schedule",
+        extensions={"x-operationId": "schedulePickup"},
+        summary="Schedule a pickup (deprecated)",
+        deprecated=True,
+        responses={
+            201: Pickup(),
+            400: ErrorResponse(),
+            424: ErrorMessages(),
+            500: ErrorResponse(),
+        },
+        request=PickupData(),
+    )
+    def post(self, request: Request, carrier_name: str):
+        """
+        Schedule a pickup for one or many shipments with labels already purchased.
+
+        **Deprecated**: Use `POST /v1/pickups` with `carrier_code` in the request body instead.
+        """
+        carrier_filter = {
+            "carrier_name": carrier_name,
+        }
+
+        pickup = (
+            PickupData.map(data=request.data, context=request)
+            .save(carrier_filter=carrier_filter)
+            .instance
+        )
+
+        response = Response(Pickup(pickup).data, status=status.HTTP_201_CREATED)
+        response["Deprecation"] = "true"
+        response["Link"] = '</v1/pickups>; rel="successor-version"'
+        return response
+
+
+class PickupDetails(APIView):
+    throttle_scope = "carrier_request"
+
+    @openapi.extend_schema(
+        tags=["Pickups"],
+        operation_id=f"{ENDPOINT_ID}retrieve",
+        extensions={"x-operationId": "retrievePickup"},
+        summary="Retrieve a pickup",
+        responses={
+            200: Pickup(),
+            404: ErrorResponse(),
+            500: ErrorResponse(),
+        },
+    )
+    def get(self, request: Request, pk: str):
+        """Retrieve a scheduled pickup."""
+        pickup = models.Pickup.access_by(request).get(pk=pk)
+        return Response(Pickup(pickup).data)
+
+    @openapi.extend_schema(
+        tags=["Pickups"],
+        operation_id=f"{ENDPOINT_ID}update",
+        extensions={"x-operationId": "updatePickup"},
+        summary="Update a pickup",
+        responses={
+            200: Pickup(),
+            404: ErrorResponse(),
+            400: ErrorResponse(),
+            424: ErrorMessages(),
+            500: ErrorResponse(),
+        },
+        request=PickupUpdateData(),
+    )
+    def post(self, request: Request, pk: str):
+        """
+        Modify a pickup for one or many shipments with labels already purchased.
+        """
+        pickup = models.Pickup.access_by(request).get(pk=pk)
+        can_mutate_pickup(pickup, update=True, payload=request.data)
+
+        # Metadata-only updates skip the carrier API call
+        if list((request.data or {}).keys()) == ["metadata"]:
+            existing = pickup.metadata or {}
+            pickup.metadata = {**existing, **(request.data["metadata"] or {})}
+            pickup.save(update_fields=["metadata", "updated_at"])
+            return Response(Pickup(pickup).data, status=status.HTTP_200_OK)
+
+        instance = (
+            PickupUpdateData.map(pickup, data=request.data, context=request)
+            .save()
+            .instance
+        )
+
+        return Response(Pickup(instance).data, status=status.HTTP_200_OK)
+
+
+class PickupCancel(APIView):
+
+    @openapi.extend_schema(
+        tags=["Pickups"],
+        operation_id=f"{ENDPOINT_ID}cancel",
+        extensions={"x-operationId": "cancelPickup"},
+        summary="Cancel a pickup",
+        responses={
+            200: Pickup(),
+            404: ErrorResponse(),
+            409: ErrorResponse(),
+            424: ErrorMessages(),
+            500: ErrorResponse(),
+        },
+        request=PickupCancelData(),
+    )
+    def post(self, request: Request, pk: str):
+        """
+        Cancel a pickup of one or more shipments.
+        """
+        pickup = models.Pickup.access_by(request).get(pk=pk)
+
+        # Idempotent re-cancel: return 409 if already cancelled
+        if pickup.status == PickupStatus.cancelled.value:
+            return Response(Pickup(pickup).data, status=status.HTTP_409_CONFLICT)
+
+        can_mutate_pickup(pickup, cancel=True)
+        update = PickupCancelData.map(pickup, data=request.data).save().instance
+
+        return Response(Pickup(update).data)
+
+
+router.urls.append(path("pickups", PickupList.as_view(), name="shipment-pickup-list"))
+router.urls.append(
+    path(
+        "pickups/<str:carrier_name>/schedule",
+        PickupRequest.as_view(),
+        name="shipment-pickup-request",
+    )
+)
+router.urls.append(
+    path(
+        "pickups/<str:pk>/cancel", PickupCancel.as_view(), name="shipment-pickup-cancel"
+    )
+)
+router.urls.append(
+    path("pickups/<str:pk>", PickupDetails.as_view(), name="shipment-pickup-details")
+)

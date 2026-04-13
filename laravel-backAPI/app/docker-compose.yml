@@ -1,0 +1,68 @@
+version: "3.7"
+services:
+    be-example-api:
+        build:
+            args:
+                user: ${SERVER_USER:-foulen}
+                uid: ${SERVER_USER_UID:-1000}
+            context: ./
+            dockerfile: Dockerfile
+        image: be-example
+        container_name: be-example-api
+        restart: unless-stopped
+        working_dir: /var/www/
+        command: bash -c " composer install && php artisan migrate && php-fpm"
+        depends_on:
+            - be-example-db
+        volumes:
+            - ./:/var/www
+        networks:
+            - be-example-api
+            - be-example-web
+
+    be-example-db:
+        image: mysql:8.0
+        container_name: be-example-db
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: ${DB_DATABASE-database}
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD-password}
+            MYSQL_PASSWORD: ${DB_PASSWORD-password}
+            MYSQL_USER: ${DB_USERNAME-foulen}
+        volumes:
+          - be-example-db:/var/lib/mysql
+        ports:
+            - ${FORWARD_DB_PORT-33066}:3306
+        networks:
+            - be-example-api
+
+    be-example-web:
+        image: nginx:alpine
+        container_name: be-example-web
+        restart: unless-stopped
+        depends_on:
+            - be-example-api
+        ports:
+            - ${APP_PORT-8000}:80
+        volumes:
+            - ./:/var/www
+            - ./docker/nginx:/etc/nginx/conf.d/
+        networks:
+            - be-example-web
+    be-example-mail:
+        image: mailhog/mailhog
+        container_name: be-example-mail
+        ports:
+            - ${MAIL_PORT-8003}:1025
+            - ${MAILHOG_PORT-8100}:8025
+        networks:
+            - be-example-api
+networks:
+    be-example-api:
+        driver: bridge
+        name: be-example-api
+    be-example-web:
+        driver: bridge
+        name: be-example-web
+volumes:
+    be-example-db:

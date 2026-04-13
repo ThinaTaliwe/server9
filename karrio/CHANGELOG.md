@@ -1,0 +1,3561 @@
+# Karrio 2026.1.26
+
+## Changes
+
+### Fix
+
+- fix(smartkargo): handle plain text error responses from API
+- fix(smartkargo): fix trace persistence and shipment cancellation
+- fix(dashboard): show request_id in API logs and enable text selection
+
+---
+
+# Karrio 2026.1.25
+
+## Changes
+
+### Feat
+
+- feat(dev): add automated release script
+
+### Fix
+
+- fix(smartkargo): trim text fields to SmartKargo API max lengths (#1037)
+- fix(smartkargo): use production API URL for live mode
+- fix(build): convert absolute paths in frozen requirements to portable format (#1036)
+
+---
+
+# Karrio 2026.1.24
+
+## Changes
+
+### Fix
+
+- fix(fedex): include signature option in rating request (#1034)
+- fix(dev): add --seed to uv venv for pip compatibility; use uv in version freeze
+- fix(dev): combine parallel test batches and auto-detect CPU cores in run-sdk-tests
+
+---
+
+# Karrio 2026.1.23
+
+## Changes
+
+### Fix
+
+- fix(smartkargo): test/live mode API URLs
+
+### Chores
+
+- chore(dev): use uv for faster local installs + Codacy coverage reporting in CI (#1032)
+
+---
+
+# Karrio 2026.1.22
+
+## Changes
+
+### Feat
+
+- feat(sdk): add is_return field to RateRequest model and serializer (#1027)
+- feat(tracking): retire aged trackers (#1023)
+- feat(return): return shipments support (#1016)
+
+### Fix
+
+- fix(fedex): signature and email notification (#1029)
+- fix(sdk): redact API key headers (#1023)
+- fix(smartkargo): ensure trace_as records for all proxy ops (#1019)
+- fix(migration): remove orgs dependency and preserve system rate sheet links
+- fix(migration): remove nonexistent orgs.0030 dependency from migration 0106
+
+### Test
+
+- test(events): assert webhook payload structure per event type (#1017)
+
+### Perf
+
+- perf(tests+ci): test suite speed improvements and CI optimisation (#1015)
+
+---
+
+# Karrio 2026.1.21
+
+## Changes
+
+### Fix
+
+- fix: replace lingering purchased status references with created
+- fix(smartkargo): fallback to N/A for empty importHsCode and exportHsCode
+- fix(dhl_express): community reported bugs - certification, address formatting, and currency
+- fix: sync shipping-platform patches (admin COGS, rate sheet split, dhl_parcel_de creds)
+
+### Docs
+
+- docs(prd): rate sheet system vs account separation
+
+---
+
+# Karrio 2026.1.20
+
+> **Breaking Change:** The shipment status `purchased` has been renamed to `created`.
+> If you have webhook listeners or automation that filter on `shipment.status == "purchased"`,
+> update them to use `"created"` instead. The database migration (0089) automatically updates
+> existing records, but external integrations must be reviewed manually.
+
+## Changes
+
+### Feat
+
+- feat(smartkargo): add taxId field to participant schemas for shipper and consignee
+- feat(smartkargo): add selected_rate with charge breakdown (shippingFee, insurance, tax) to shipment response
+- feat(smartkargo): add configurable currency to ConnectionConfig
+
+### Fix
+
+- fix(smartkargo): resolve tracking params from shipment meta options instead of relying solely on tracking number parsing
+- fix(smartkargo): add missing tracking response fields (estimatedDeliveryDate, referenceAirWaybill, bagNumber, subEventType)
+- fix(smartkargo): add INF and MDL event type mappings for in_transit status
+- fix(smartkargo): enrich tracking info with package weight and shipment package count
+- fix(smartkargo): support tracking by SmartKargo AWB (prefix + Airwaybill) (#1006)
+- fix(dashboard): replace deprecated "purchased" status with "created" after migration 0089 (#1007)
+- fix: restore purchased status to ShipmentStatusEnum in TS types
+- fix: remove is_system from admin ratesheet test query
+- fix: resolve CI test failures (server-tests, sdk-tests, dashboard-ci)
+- fix: sync shipping-platform patches (DHL enhancements, APM tracing, KEK rotation, document handling) (#1004)
+
+### Chore
+
+- chore: generate latest API schemas
+
+---
+
+# Karrio 2026.1.19
+
+## Changes
+
+### Fix
+
+- fix(usps): resolve KeyError 'PRIORITY_MAIL' in OptionEnum value lookup (#1003)
+- fix(carriers/mydhl): carrier fixes and improvements
+- fix(shipment): rename status purchased→created, remove choices constraint, enrich tracker event
+- fix(mydhl): add missing product codes O and C to ShippingService enum
+- fix(mydhl): bundle multi-piece shipment labels from per-package documents
+- fix(mydhl): pickup creation fails with extraneous countryName key
+- fix(mydhl): resolve service name in shipment response using request context
+- fix(mydhl): correct ShippingService product codes and services.csv to match DHL API spec
+- fix(mydhl): replace invalid PackagingType codes with DHL API spec values and make typeCode optional
+- fix(mydhl): add additionalDetails to error response schema and parser
+- fix(mydhl): fix date parsing in rate and shipment requests and dimension null check
+- fix(migration): data migration purchased→created + remove choices constraint from Shipment.status
+
+### Docs
+
+- docs(mydhl): update carrier testing report
+- docs(readme): add MCP server section with quick install and usage examples
+
+---
+
+# Karrio 2026.1.18
+
+## Changes
+
+### Fix
+
+- fix: sync shipping-platform patches (admin scoping, dhl_parcel_de encryption, element assets)
+- fix: dashboard build type errors and latest schema data
+
+### Docs
+
+- docs(prd): add subtree sync workflow for shipping-platform ↔ karrio
+- docs(prd): add edition isolation + source vs deployed build mode sections
+- docs(prd): UV_MIGRATION — migrate karrio to uv for end-to-end Python toolchain
+- docs(mcp): add MCP server documentation — install, tools, Claude Desktop/Cursor setup
+
+### Test
+
+- test(mcp): add live integration tests against real karrio server
+
+---
+
+# Karrio 2026.1.17
+
+## Changes
+
+### Feat
+
+- feat(tracing): capture and store HTTP headers in carrier API tracing records
+- feat(dashboard): include headers as -H flags in devtools cURL copy
+- feat(mcp): add list_carrier_connections tool to MCP server
+
+### Fix
+
+- fix(usps): use lib.failsafe for transit_days parsing from commitment.name
+- fix(ups): truncate phone numbers to 15-character API limit
+- fix(ups): enable pickup service code option override
+- fix(mcp): remove unsupported validate_address tool and clean up tests
+
+---
+
+# Karrio 2026.1.16
+
+## Changes
+
+### Feat
+
+- feat: add order_id field to Shipment model with REST/GraphQL exposure and auto-population
+- feat: add failed shipments tab with failure reasons and request_id propagation
+- feat: add @karrio/mcp server package for AI-powered shipping workflows
+- feat: add optional credential encryption with KEK-based secret storage
+- feat: add rate sheet editor improvements, pricing config, and markup management
+- feat: add DPD Meta connector updates with pickup support and error handling
+
+### Fix
+
+- fix: SmartKargo field names to match actual API (grossVolumeUnityMeasure, hasInsurance, insuranceAmmount)
+- fix: SmartKargo add customs/commercialInvoice support to rate requests and label base64 extraction
+- fix: SmartKargo move account_id to connection config, add SiteId header and barCode extraction
+- fix: DHL Parcel DE add economy and GoGreen Plus options, return billing config, and fix service matrix
+- fix: UPS add transId and transactionSrc headers to tracking requests
+- fix: UPS handle null ShippingLabel in return shipment response
+- fix: Landmark tracking multi-leg event ordering and delivered status
+- fix: propagate x-request-id through tracer context to carrier calls
+- fix: resolve all failing tests and build issues
+
+### Docs
+
+- docs: add Open Shipping Protocol (OSP) specification suite
+- docs: add carrier testing reports for DHL Parcel DE, UPS, and DPD Meta
+
+---
+
+# Karrio 2026.1.15
+
+## Changes
+
+### Fix
+
+- fix: remove broken constance cache backend setting for non-Redis environments
+
+---
+
+# Karrio 2026.1.14
+
+## Changes
+
+### Fix
+
+- fix: make ShipmentType.is_return nullable to match Django model
+- fix: ensure is_return and request_id fields are available on ShipmentType GraphQL schema
+- fix: add missing request_id field and filter to ManifestType GraphQL schema
+- fix: resolve N+1 queries in GetSystemConnections admin query with batch usage resolution
+- fix: add constance cache fallback (LocMemCache) when Redis is not configured to prevent N+1 config queries
+
+---
+
+# Karrio 2026.1.13
+
+## Changes
+
+### Fix
+
+- hotfix: Landmark return address + is_return nullable (#973)
+- fix: show detailed error messages for shipment cancellation and status
+
+# Karrio 2026.1.12
+
+## Changes
+
+### Feat
+
+- feat: add SmartKargo carrier integration (rating, shipment, tracking, labels)
+- feat: add return shipment support to SDK core and server layer
+- feat: add return shipment support for UPS, FedEx, Canada Post, DHL Express, DHL Parcel DE, USPS, and more
+- feat: add return shipment fields to TypeScript GraphQL types
+- feat: add X-Request-ID middleware and propagation to all operations
+- feat: expose request_id as first-class GraphQL field and filter
+- feat: display request_id in entity detail views and devtools
+
+### Fix
+
+- fix(canadapost): use recipient country code for international rating
+- fix(landmark): remove hardcoded User-Agent headers from proxy requests
+- fix: add missing Info type annotations for strawberry GraphQL resolvers
+- fix: dispatch webhook notifications for bulk-updated trackers
+
+### Chore
+
+- chore: update generated files and add pricing migration
+- chore: clean up tests and code to match AGENTS.md conventions
+- chore: add smartkargo carrier image mapping
+
+### Docs
+
+- docs: add X-Request-ID implementation PRD
+- docs: add Return Shipment API PRD
+- docs: add Karrio MCP Server PRD
+
+---
+
+# Karrio 2026.1.11
+
+## Changes
+
+### Feat
+
+- feat: add markup feature gating with `meta.feature_gate` for conditional markup application
+- feat: add feature_gate field to markup editors (inline and advanced admin)
+- feat: add tracker bulk webhook resend and per-row action menu
+- feat: add batch webhook resend API endpoint
+- feat: integrate worker action buttons in devtools frontend
+- feat: add worker management GraphQL mutations for admin
+- feat: add markup filtering by meta category, plan, active status and type
+- feat: improve CSV preview with progressive markup totals and column filtering
+- feat: add markups management to rate sheet editor and improve markup dialogs
+
+### Fix
+
+- fix: make Health view scrollable and wrap maintenance actions in card
+- fix: skip empty rate rows in CSV preview
+- fix: align tracker checkbox column width with shipments table
+- fix: show exact page counts instead of "of many" in devtools pagination
+- fix: resolve duplicate TaskExecution records causing stuck executing status
+- fix: use icontains for meta and metadata value filters on markups
+- fix: port rate sheet editor layout improvements and bug fixes
+
+### Perf
+
+- perf: cache middleware auth result to prevent duplicate token DB lookups
+- perf: reuse pre-loaded carriers in buy_shipment_label to avoid duplicate connection queries
+- perf: batch constance config queries to eliminate N+1 in shipment creation
+- perf: batch tracker saves to eliminate N+1 UPDATE queries in tracking pipeline
+- perf: eliminate SELECT FOR UPDATE lock contention in task signal handler
+
+### Refactor
+
+- refactor: update devtools drawer, navbar, and rate sheet CSV preview
+- refactor: use generic meta_key/meta_value and metadata_key/metadata_value filters for markups
+
+### Test
+
+- test: add batch webhook resend tests
+- test: add admin CRUD tests for markup meta field and filters
+- test: add feature-gated markup applicability tests
+
+### Chore
+
+- chore: generate admin migrations
+
+---
+
+# Karrio 2026.1.10
+
+## Changes
+
+### Fix
+
+- fix: periodic data archiving task running every minute instead of daily
+- fix: replace dynamic InstanceConfigType with JSON scalar for OSS compatibility
+- fix: naive datetime warnings when querying Fee records
+- fix: health status API double-slash URL causing 404
+- fix: add keyword search field to tracing records filter
+
+---
+
+# Karrio 2026.1.9
+
+## Changes
+
+### Feat
+
+- feat: add rate sheet editor to connections element and strip carrier SVG bundling
+- feat: enhance shipments and trackers list views with rate and destination columns
+- feat: add webhook event replay with event_id support
+- feat: add carrier network link to admin sidebar
+- feat: merge tracker logs and events into shipment activity timeline
+- feat: add dynamic carrier config fieldsets to platform admin
+- feat: add event timeline with tracing records and dedicated tracing view
+- feat: add worker monitoring and system health views to developer tools
+
+### Fix
+
+- fix: web app Next.js 16 Turbopack and ESM compatibility
+- fix: update nextra import paths for v4 compatibility
+- fix: resolve auth token caching issues causing repeated OAuth requests
+
+### Refactor
+
+- refactor: improve developer tools drawer and views
+- refactor: split admin GraphQL into admin/ and admin-ee/ for OSS/EE separation
+- refactor: move admin module from ee/insiders to OSS
+- refactor: relocate carrier integration skills from CLI to SKILLS/
+- refactor: clean up tracking pipeline and add task lock for deduplication
+- refactor: replace monolithic tracker update with dispatcher + per-carrier worker tasks
+
+### Chore
+
+- chore: regenerate schemas and frontend types
+- chore: add JS client and elements build steps to CI workflows
+- chore: update built element static assets
+
+---
+
+# Karrio 2026.1.8
+
+## Changes
+
+### Fix
+
+- fix: migrate to django-health-check v4.0
+- fix: ensure background tasks execute when no async worker is available
+
+---
+
+# Karrio 2026.1.7
+
+## Changes
+
+### Feat
+
+- feat(dashboard): enhanced filtering, copy, and shipment preview improvements
+- feat(dhl_parcel_de): return shipment support for DHL Parcel DE and FedEx rating
+
+### Fix
+
+- fix: pass meta to update_tracker on API-triggered tracker refresh
+- fix: correct OrderFilter typo ontion_key/ontion_value -> option_key/option_value
+- fix: background tracker failures and landmark tracking issues
+- fix: resolve migration circular dependency for providers.carrier rename
+- fix: resolve migration error for providers.carrier rename
+- fix: allow shipment cancellation when pickup is cancelled
+- fix: dashboard docker build - copy entrypoint from prune stage
+- fix: add libc6-dev to Docker compile stage for pyzint C extension
+- fix(dpd_meta): extract sendingDepot from JWT and inject into pickup requests
+- fix(dpd_meta): fix pickup time format, weight handling and response parsing
+- fix(dpd_meta): correct pickup schema types and add missing vendor fields
+
+---
+
+# Karrio 2026.1.6
+
+## Changes
+
+### Feat
+
+- feat: add ReturnShipment model for capturing return label data from carriers
+- feat(dhl_parcel_de): extract return shipment tracking number from shipment response
+- feat(dashboard): add keyword search filter to Events and Trackers
+- feat(dashboard): add "Copy Full Event" button to event detail viewer
+- feat(dashboard): add entity_id filter field to logs filter dropdown
+- feat(dashboard): add keyword search input to trackers filter popover
+- feat(dashboard): display return shipment details in shipment preview sheet
+
+### Fix
+
+- fix(dashboard): use correct `connection_id` and `carrier_code` fields in shipment connection details
+- fix(dashboard): use `keyword` instead of `query` for events search filter
+- fix(dashboard): remove navigation link from tracker list tracking numbers
+
+### Chore
+
+- chore: update GraphQL schema and TypeScript types for return_shipment field
+- chore: add `keyword` field to EventFilter and TrackerFilter GraphQL inputs and TypeScript types
+
+### Test
+
+- test: add return_shipment server tests and update shipment fixtures
+
+---
+
+# Karrio 2026.1.5
+
+## Changes
+
+### Feat
+
+- feat: add carrier-agnostic POST /v1/pickups endpoint with carrier_code and options.connection_id
+- feat: add pickup status tracking with lifecycle events (scheduled, picked_up, cancelled, closed)
+- feat(core): add pickup status filtering and carrier-agnostic scheduling support
+- feat(dashboard): update pickup scheduling to use new carrier-agnostic API
+- feat(dashboard): redesign pickup scheduling dialog with relevant karrio pickup fields
+- feat(dashboard): add pickup detail sheet with activity timeline, tracking records, and related shipments
+- feat(dashboard): add tracker detail page with activity timeline and API logs
+- feat(dashboard): add stacked and condensed layout modes to ActivityTimeline component
+- feat(dashboard): augment tracker preview sheet with activity section and detail navigation
+
+### Fix
+
+- fix(dashboard): prevent infinite re-render loops in list pages and filter components
+- fix(dashboard): fix tracker preview sheet showing unrelated activity logs
+
+### Fix
+
+- fix(postat): correct SOAP element names in shipment test assertions
+
+### Test
+
+- test: extend pickup API test coverage for status transitions and lifecycle events
+
+### Chore
+
+- chore: update API schemas and generated types for pickup enhancements
+
+### Docs
+
+- docs: add Pickup API Modernization PRD
+- docs: prepare PRD for carrier_name/carrier_id future refactoring
+- docs: rename carrier connection architecture document
+- docs: add Tracker Activity Dashboard Enhancement PRD
+
+---
+
+# Karrio 2026.1.4
+
+## Changes
+
+### Feat
+
+- feat: enrich carrier connectors with services CSV data and configuration annotations
+- feat: add HTTP-only cookie authentication for JWT tokens
+
+### Fix
+
+- fix: various fixes for gateway, pickups, label creation and pricing
+- sec(fix): potential fix for code scanning alert no. 60: construction of a cookie using user-supplied input
+
+### Chore
+
+- chore: upgrade Next.js to 16.1.5
+- chore: fix frontend builds for Next.js 16 compatibility (Turbopack, CSS import ordering, deprecated APIs)
+- chore: add MANIFEST.in files for connector service CSV packaging
+- chore: fix SDK tracking tests for DHL Parcel DE, Hermes and DPD connectors
+
+---
+
+# Karrio 2026.1.3
+
+## Changes
+
+### Feat
+
+- feat: end-to-end pickup management with support for recurring + optional shipments link + graphql
+- feat(dhl_parcel_de): migrate to dedicated XML tracking API instead of universal tracking
+- feat(ups): add missing pickup API implementation for REST+OAuth2 integration
+- feat: improve metafield relationship definition and augment all major objects with metafields
+- feat(dhl_parcel_de): add support for reusable global connection app
+- feat(dhl_parcel_de): restructure billing_number configuration per services at the connection level
+- feat(hermes): implement tracking functionality with shipment info API
+- feat(hermes): add TrackingStatus and TrackingIncidentReason enums with event codes
+- feat(hermes): add multi-piece shipment support
+- feat: improve trace display in activity timeline (@jacobshilitz)
+- feat: SDK service level features, volumetric weight, and static rate resolution
+- feat: rate sheet weight brackets and server-side static rate resolution
+- feat: metafield org-aware access control
+- feat: workspace config preferences and service level features GraphQL schema
+- feat: shipment applied_fees field for accounting
+- feat: enhance usage stats and Markups management
+
+### Fix
+
+- fix: potential fix for code scanning alert no. 59: Clear-text logging of sensitive information
+- fix(fedex): round package dimensions to integers (@jacobshilitz)
+- fix(logs): set entity_id for failed shipment actions (@jacobshilitz)
+- fix: inconsistent address, parcels and products templates GraphQL signatures
+- fix(hermes): remove redundant dimension checks and refactor to single tree instantiation
+- fix: post_processing closure-in-loop bug when multiple methods registered
+
+### Refactor
+
+- refactor(hermes): use inline headers and clean up comments
+- refactor: clean up proxy by extracting data processing helpers to utils
+- refactor: fee model as denormalized snapshot decoupled from FKs
+
+### Chore
+
+- chore(dhl_parcel_de): improve pickup integration with live tests
+- devx: add PRD template and update AGENTS.md for future PRD writing
+- test(hermes): add tracking unit tests
+- chore: add no-raw-SQL migration rule to AGENTS.md
+
+---
+
+# Karrio 2026.1.2
+
+## Changes
+
+### Feat
+
+- feat(asendia): add Asendia carrier integration with shipping, tracking, manifest support and multi-package handling
+- feat(spring): add Spring carrier integration with shipping, tracking, cancellation and CSV-based rating
+- feat: add event injection API for programmatic tracking event creation
+- feat: introduce products GraphQL API with JSONField optimization for better query performance
+- feat: add options meta and document category unified enum
+- feat: add carrier icons for new integrations
+- feat: improve address, parcel and products templates with database structure optimization
+
+### Fix
+
+- fix(dhl_parcel_de): correct addressHouse parsing
+- fix(fedex): update signed_by fallback for B2B shipments
+- fix(fedex): OC status should not be considered picked up
+- fix(fedex): update TrackingStatus to new format
+- fix(ups): correct shipment_origin values and add pickup date to trackers
+- fix(frontend): add GLS to carrier images
+
+### Refactor
+
+- refactor: migrate order details page to shadcn components with sidebar layout
+- refactor: connections management for better data normalization and optimized reads
+- refactor: enhance tracking events with TrackingIncidentReason
+
+### Chore
+
+- chore: QA improvements and migration integrity fixes
+- test: add comprehensive tracking tests
+
+---
+
+# Karrio 2026.1.1
+
+## Changes
+
+### Feat
+
+- feat: add payment as well on rate and update API schemas
+- feat: update rate requests to use exhaustive customs data when provided for international requests
+- feat: introduce computed estimated_delivery on tracker creation when transit day is available
+
+### Fix
+
+- fix: add missing customs field to RateRequest serializer
+- fix: affected the computed adjusted weight on all integrations
+- fix: below 3 decimal items' weight rounding causing invalid total package weight
+
+---
+
+# Karrio 2026.1
+
+## Changes
+
+### Feat
+
+- feat(hermes): add Hermes Germany carrier integration with shipping, pickup, and rating support
+- feat(gls): add GLS Group carrier integration with OAuth2 authentication and shipment/tracking
+- feat(dpd_meta): add DPD META-API carrier integration with Bearer token authentication and caching
+- feat(postat): add Austrian Post (PostAT) carrier integration via Post-Labelcenter SOAP API
+- feat(parcelone): add ParcelOne multi-carrier hub integration with JSON REST API
+- feat(dhl_parcel_de): implement pickup support
+- feat: apply ratesheet GraphQL enhancements and the editor with shared zones and surcharges
+- feat: implement find helper for status and reason mapping retrieval
+- feat: introduce carrier integration FAQ and improve multi-piece shipment abstraction
+
+### Chore
+
+- chore: move chronopost to karrio core maintained connectors
+- refactor: standardize carrier authentication to use Proxy.authenticate() method
+- refactor: review and cleanup new integrations to match coding standard
+
+---
+
+# Karrio 2025.5.7
+
+## Changes
+
+### Feat
+
+- feat: set up agent-specific md files + enhanced shared AGENTS.md
+- feat: add support for karrio migrate post dev install
+- feat: draft claude carrier integration skill and PRD for integrator agent implementation
+- feat: introduce reason, timestamp and status at the tracking event object level + picked_up status for richer tracking analytics
+- feat(sapient): improve error handling + upgrade to standardized authenticate proxy method for a more robust auth handling
+
+### Fix
+
+- fix(fedex): exclude customs for domestic shipments
+
+### Docs
+
+- docs: prepare PRDs for upcomming feature developments
+
+### Chore
+
+- refactor: authentications to the new proxy interface
+
+---
+
+# Karrio 2025.5.6
+
+## Changes
+
+### Feat
+
+- feat: ratesheet datastructure upgrade + support for surcharges
+- feat: improve UX with document download to support all authentication methods available to the API
+
+### Chores
+
+- chore(deps): bump next from 15.4.8 to 15.4.10 in /packages/core
+
+---
+
+# Karrio 2025.5.5
+
+## Changes
+
+### Feat
+
+- feat: implement full features for mydhl express integration + vendor assets updates
+- feat(mydhl): implement complete shipment creation with customs support
+
+
+### Docs
+
+- docs: update README with recent app screenshots
+
+### Chore
+
+- chore(deps): bump next from 15.0.3 to 15.4.7 on all apps
+
+---
+
+# Karrio 2025.5.4
+
+## Changes
+
+### Feat
+
+- feat(WIP): introduce karrio studio to enhance dev experience and assist integration and development
+- feat: introduce shipping_documents field on shipment object that returns a more structured list of shipping documents details and include base64 documents version from purchasing APIs
+- feat: add audit log Model settings required by django-auditlog==3.4.0
+- feat: introduce `reason` field to karrio unified tracking event data
+
+### Fix
+
+- fix: idempotent API response for shipment cancellation when called twice on a shipment that was successfully cancelled return HTTP code 304
+
+### Docs
+
+- docs: karrio Shipping integration quick start with key APIs
+
+### Chore
+
+- chore: remove poorly implemented permissions layer
+
+---
+
+# Karrio 2025.5.3
+
+## Changes
+
+### Feat
+
+- feat(WIP): introduce karrio studio to enhance dev experience and assist integration and development
+- feat: introduce shipping_documents field on shipment object that returns a more structured list of shipping documents details and include base64 documents version from purchasing APIs
+- feat: add audit log Model settings required by django-auditlog==3.4.0
+- feat: introduce `reason` field to karrio unified tracking event data
+
+### Fix
+
+- fix: idempotent API response for shipment cancellation when called twice on a shipment that was successfully cancelled return HTTP code 304
+
+### Docs
+
+- docs: karrio Shipping integration quick start with key APIs
+
+### Chore
+
+- chore: remove poorly implemented permissions layer
+
+---
+
+# Karrio 2025.5.3
+
+## Changes
+
+### Feat
+
+- feat: make shipment cancellation idempotent
+- feat: Implement POST requests for shipping documents downloads
+- feat: map error/message levels in carrier integrations and karrio server
+- feat: add support for shipping method purchase on /v1/shipments for EE edition
+
+### Fix
+
+- fix: regression on constance signal
+- fix: constance N+1 issue
+
+### Chore
+
+- chore: apply sentry setup fix + permissions unstable migrations
+
+---
+
+# Karrio 2025.5.2
+
+## Changes
+
+### Feat
+
+- feat: consolidate apply_shipping_rules with support for single call label generation
+
+### Fix
+
+- fix: server perf affected by sentry + fix permission issues caused by carriers permission update
+
+---
+
+# Karrio 2025.5.1
+
+## Changes
+
+### Fix
+
+- hotfix: regression or legacy soap request parser utility library
+
+---
+
+# Karrio 2025.5
+
+> **Release Date:** Dec 1st, 2025
+>
+> **Blog Post:** https://karrio.io/blog/karrio-2025-5-sustainability
+
+## Highlights
+
+Karrio 2025.5 is a milestone release introducing a **dual-license model** to ensure long-term sustainability while preserving the open-source core. This release also includes significant technical improvements, new carrier integrations, and enhanced developer experience.
+
+### License Transition
+
+Karrio now uses a dual-license structure:
+
+- **LGPL-3.0** for the open-source core (server, SDK, community plugins)
+- **Karrio Enterprise License** for enterprise features (`/ee` directory)
+
+This follows the proven models of Odoo and n8n—enabling a thriving open-source community alongside a sustainable business.
+
+### Discontinuation of Karrio Insiders
+
+The Karrio Insiders program is discontinued in favor of a focused **Karrio Enterprise License** for embedding and white-labeling needs.
+Existing Insiders donations and subscriptions will end December 31st.
+
+## What's New
+
+### New Interfaces & APIs
+
+Karrio 2025.5 introduces a comprehensive set of interfaces that extend the platform's capabilities beyond core shipping operations. These interfaces allow carriers and LSP (Logistics Service Provider) plugins to provide specialized services.
+
+```mermaid
+flowchart TB
+    subgraph Client["Client Application"]
+        API[Karrio API]
+    end
+
+    subgraph Core["Core Shipping Operations"]
+        Rating[Rating]
+        Shipping[Shipping]
+        Tracking[Tracking]
+        Pickup[Pickup]
+    end
+
+    subgraph NewInterfaces["New Interfaces (2025.5)"]
+        Hooks[Hooks Interface]
+        Duties[Duties Interface]
+        Insurance[Insurance Interface]
+        Webhook[Webhook Interface]
+        AuthProxy[Auth Proxy Interface]
+    end
+
+    subgraph Existing["Existing Interfaces"]
+        Address[Address Validation]
+        Manifest[Manifest]
+        Document[Document Upload]
+    end
+
+    subgraph Plugins["Carrier & LSP Plugins"]
+        Carriers[UPS, FedEx, DHL...]
+        LSPs[Avalara, InsureShield...]
+    end
+
+    API --> Core
+    API --> NewInterfaces
+    API --> Existing
+
+    Core --> Plugins
+    NewInterfaces --> Plugins
+    Existing --> Plugins
+```
+
+| Interface      | Purpose                                    | Example Use Cases                                |
+| -------------- | ------------------------------------------ | ------------------------------------------------ |
+| **Hooks**      | Custom shipping logic integration points   | Pre/post shipment processing, custom validations |
+| **Duties**     | International duties and taxes calculation | Landed cost estimation, DDP shipments            |
+| **Insurance**  | Shipment protection capabilities           | Third-party insurance providers, declared value  |
+| **Webhook**    | Carrier webhook management                 | Real-time tracking updates, event subscriptions  |
+| **Auth Proxy** | Standardized OAuth/authentication          | Carrier OAuth flows, token management            |
+
+### New Carrier Integrations
+
+- **Teleship** - Full integration with OAuth, webhooks, and duties engine support
+- **Landmark Global** - Cross-border e-commerce shipping (enhanced)
+- **DTDC** - Indian courier and logistics integration
+
+### Dashboard & UI
+
+- Migrated to shadcn/ui with Tailwind CSS
+- Dark mode theme for developer tools
+- New Karrio Dev Tools drawer
+- Improved carrier connection management
+- Enhanced settings and organization management
+- Document template editor improvements
+- Bulk print and shipment CSV export
+- App Store for managing shipping apps (beta)
+- Swagger API playground (replaced Redoc)
+- Shippers addons management page
+
+### Performance & Reliability
+
+- Resolved N+1 query issues across models and GraphQL
+- Database lock fixes for SQLite-based workers
+- Improved Redis configuration (REDIS_URL, REDIS_SSL support)
+- HUEY worker initialization race condition fix
+- Optimized archiving queries with batch processing
+- Database indexes for date-based filters
+
+### Automation & Workflows
+
+- Shipping Rules API and dashboard panels
+- Workflows management for automated shipping logic
+- `has_alternative_services` flag for carrier connections
+
+### Developer Experience
+
+- Plugin development guide documentation
+- Telemetry abstraction (Sentry, DataDog, OpenTelemetry)
+- Loguru logging improvements
+- AGENTS.md for AI-assisted development
+- Improved error parsing and notifications
+- Karrio CLI (kcli) with plugin management and carrier details
+- SDK plugins loader with entrypoint support
+- Docker-Compose plugins mount point (`./plugins` dir)
+- `x-tenant-id` and `x-request-id` headers support
+
+### Security & Enterprise
+
+- Limited scope API tokens for secure document downloads
+- SSO metadata fields for organizations
+- Secure Redis connection handling
+- Admin session cookie customization
+- Tenant isolation improvements
+
+## Breaking Changes
+
+- **Python SDK import**: Changed from `import karrio` to `import karrio.sdk as karrio`
+- **Dashboard port**: Default changed from `3000` to `3002`
+- **Python version**: Now requires `>=3.11`
+- Deprecated carrier connections and custom models removed
+- GraphQL query/mutation changes (see integration tests)
+- Dashboard component refactor (shadcn migration)
+- Headless UI removed in favor of shadcn/ui components
+
+## Bug Fixes
+
+- OAuth token expiry calculation
+- Package preset override regression
+- Custom rate resolution with missing dimensions
+- Orders duplication and race conditions
+- Shipment cancellation webhook format
+- Email change token validation
+- Organization dropdown errors
+- Dashboard state management issues
+
+## Documentation
+
+- Updated plugin development guide
+- Redis setup instructions
+- Dashboard navigation guide
+- Missing environment variables documented
+
+## Upgrade Notes
+
+1. Review the new [LICENSE](https://github.com/karrioapi/karrio/blob/main/LICENSE) file
+2. Insiders users: contact hello@karrio.io for license transition
+3. Update Python SDK imports: `import karrio` → `import karrio.sdk as karrio`
+4. Update dashboard port references from `3000` to `3002`
+5. Ensure Python `>=3.11` is installed
+6. Check GraphQL queries and Shipping REST APIs for breaking changes
+
+## Contributors
+
+Thanks to all contributors who made this release possible, including @mazzarito, @Ansh-Dev-Nagar @akaylia123 and @ashishdevnagar
+
+---
+
+# Karrio 2025.5rc46
+
+## Changes
+
+### Feat
+
+- feat: add karrio hooks interface
+- feat: add karrio duties interface
+- feat: add karrio insurance interface
+- feat: add karrio webhook interface
+- feat: add standardized auth proxy interface
+- feat: add default service csv file for dhl parcel and rollback packet International service
+
+### Docs
+
+- docs: karrio plugins development guide
+
+### Tests
+
+- tests: consolidate new interface integrations with tests
+
+### Chores
+
+- chore: update website with karrio embed page
+- devX: add drf type stub for better IDE type suggestions
+
+---
+
+# Karrio 2025.5rc45
+
+## Changes
+
+### Feat
+
+- feat: introduce shipping rules, app management, and improve types setup scripting
+- feat: introduce bulk print and shipment CSV export
+- feat: add landmark_maxipak_scan_pddp for LGINTBPMO landmark service
+- feat: add support for manual organization creation in the dashboard
+- feat: add sensitive default to DHL Parcel DE and missing required exportType
+- feat: introduce package_configuration field to shipping methods
+- feat: improve dhl parcel error parsing
+- feat: add full Sentry features
+
+### Fix
+
+- fix: regression for final N+1 manager models solution
+- fix: slow archiving queries
+- fix: database lock issue with SQLite-based worker
+- fix: N+1 issue with tenants resolution
+- fix: invalid GraphQL query filter applied to Logs on GraphQL
+- fix: JSONDecode issue with Sapient auth error
+- fix: N+1 issue with `constance` config
+- fix: shipment cancellation webhook notification unparsable format data
+- fix: N+1 issue for all carrier_config affected models
+- fix: N+1 issue with the tracker's background update
+- fix: Sentry caught a validator issue
+- fix: solve the orders duplication and race conditions issues
+- fix: N+1 issues across Models and GraphQL queries
+- fix: tests and installation for Teleship to be released
+- fix: OAuth token expiry calculation and add comprehensive error handling
+- fix: exclude customs node completely for DHL Parcel national label requests
+- fix: download header content causing failure in production
+- fix: AttributeError: 'ShipmentSerializer' object has no attribute 'Meta', overshadowing root cause error
+- fix: regression in custom rate resolution when dimensions are absent
+- fix: remove Redis health check when using granular parameters
+- fix: Redis configuration for health check and task queue
+- fix: regression redis connection setup for worker and API
+- fix: unstable state management for connections and method forms
+
+### Chores
+
+- chore: clean up dhl parcel and landmark tests to match coding design
+- chore: add data isolation tests for contextual carrier configs
+- chore: customize karrio admin session cookies to prevent clash with ORY sessions
+
+---
+
+# Karrio 2025.5rc34
+
+## Changes
+
+### Feat
+
+- feat: add missing pending status mapping for landmark cancellation handling
+- feat: adjust easyship shipemnt mapping to differentiate origin from sender and keep consistency with other integration shipper data mapping
+
+### Fix
+
+- hotfix: revert problematic org_id header cookie value assignment
+
+---
+
+# Karrio 2025.5rc33
+
+## Changes
+
+### Feat
+
+- feat: Enhance API vs worker starter mode by enforcing Django vs HUEY setup and related cache + redis configurations
+- feat: Add support for `x-tenant-id` and `x-request-id` headers
+- feat: make karrio developer tools dark mode theme
+
+### Fix
+
+- fix: confusing `dhl_parcel_de` connection credentials and config
+- fix: fix demo shipping tasks app state management
+- fix: org-dropdown errors
+- fix: change invite member flow
+- fix: insecure authenticated Redis connection URL
+- fix: prevent dashboard crash on missing org header
+- fix: when changing org name in settings, UI now updates automatically instead of needing a manual refresh
+
+### Chores
+
+- chore: test disabling server redis connection on workers, leaving HUEY redis connection only, and unifydb connection
+
+
+---
+
+# Karrio 2025.5rc32
+
+## Changes
+
+### Feat
+
+- feat: improve logging with loguru
+- feat: add support for REDIS_URL and REDIS_SSL env var for simpler ways to configure Redis for deployment
+
+### Fix
+
+- fix: regression in package preset override
+
+### Docs
+
+- docs: update docs with missing env var and Redis set up instructions
+
+
+---
+
+# Karrio 2025.5rc31
+
+## Changes
+
+### Fix
+
+- hotfix: HUEY powered worker django settings
+
+---
+
+# Karrio 2025.5rc30
+
+## Changes
+
+### Fix
+
+- patch: karrio server core module to fix invalid worker settings
+
+---
+
+# Karrio 2025.5rc29
+
+## Changes
+
+### Feat
+
+- feat: add exhaustive list of landmark maxipack services
+
+### Fix
+
+- fix: HUEY initialization race condition causing duplicated instances with Redis connection failure
+- fix: inconsistent tracking number and last mile tracking number extraction in shipment response
+- fix: landmark tracking event sorting
+
+### Chores
+
+- chore: fix package-lock and platform build
+- chore: cleanup the app theme and authentication setup
+- chore: update APIs to match feedback + improve CI CD setup
+
+### Docs
+
+- docs: update README docs url
+
+---
+
+# Karrio 2025.5rc28
+
+## Changes
+
+### Feat
+
+- feat: add default mapping for maxipack premium
+- feat: differentiate last_mile carrier from hubs carrier
+- feat: add missing carrier logos and id mapping
+- feat: update generated openapi types
+
+---
+
+# Karrio 2025.5rc27
+
+## Changes
+
+### Fix
+
+- fix: landmark tracking number mapping during processing to solve invalid backgroung tracking failure.
+
+---
+
+# Karrio 2025.5rc26
+
+## Changes
+
+### Feat
+
+- feat: add metadata fields to organization and organization user for SSO setup
+
+### Fix
+
+- fix: document templates editor bug and error notifications
+- feat(signup): block form access when ALLOW_SIGNUP is disabled
+- fix: confirm email in add user workflow now includes full link not just token and is clickable
+- fix: added a detailed error message to the pop up when it Failed to add User in admin console
+- fix(signup): redirect to success page and fix domain route import
+- fix: redirection to sign in page upon clicking confirmation link if not authorized, changing confirmation link to a clickable link in the sent email
+- add: an error message popup with a reason to 'change email address' when the confirmation email fails to send
+- fix(signup): add success notification and redirect to sign-in page
+- fix: email change token validation
+
+
+---
+
+# Karrio 2025.5rc25
+
+## Changes
+
+### Fix
+
+- hotfix: landmark global default services loading and assets attachment
+
+---
+
+# Karrio 2025.5rc24
+
+## Changes
+
+### Feat
+
+- feat: landmark global carrier integration
+
+### Chore
+
+- chore: environsment cleaning and landmark testing
+
+---
+
+# Karrio 2025.5rc23
+
+## Changes
+
+### Feat
+
+- feat: adds a button to copy docs pages for LLMs
+
+### Fix
+
+- fix: redirection issue when signin page is accessed directly
+- fix: the readability of certain features on the documentation when in dark mode
+
+### Chore
+
+- chore: set up Posthog for docs analytics
+
+### DevX
+
+- devx: prevent node constant override to latest version and set a minimum version for karrio development
+- devx: debugging and improving dev and HTTPS support both for development and production deployment
+- devx: introduce AGENTS.md using cursor
+
+---
+
+# Karrio 2025.5rc22
+
+## Changes
+
+### Feat
+
+- feat: update sapient API options and fix max SKU length issue.
+- feat: migrate shipment preview to shadcn with enriched details.
+
+---
+
+# Karrio 2025.5rc21
+
+## Changes
+
+### Feat
+
+- feat: add support for thread lock caching and oauth access_token retrieval
+- feat: remove selected_rate extraction on buy label for FedEx
+- feat: improve live rate components and remove label type selection in label creation forms
+- feat: set up `./plugins` dir at the root of the Docker-Compose templates files to provide a default mounting point
+- feat: added warning for mixed currencies in multiple items
+
+### Fix
+
+- fix: FedEx default invoice generation behaviour and accountNumber data mapping
+- fix: FedEx regression due to signature options handling behaviour change
+- fix: for package level reference numbers (by @mazzarito)
+- fix: generated type mismatch post schema regeneration for UPS
+- fix: replaced create order with draft order
+- fix: sync scrolling of left and right sections of draft-order page
+- fix: removed unnecessary line-item unlinking mechanisms
+- fix: dashboard-guide docs missing screenshots
+- fix: removed sticky property of warning box
+
+### Docs
+
+- docs: add open new terminal instructions
+- docs: add missing screenshots for dashboard-guide docs
+- docs: update docs to improve dashboard navigation guide and plugins mounting setup
+
+### Chore
+
+- chore: ensure proper CSP setup for dashboard and website
+- devX: update local development commands for starting the server
+
+---
+
+# Karrio 2025.5rc20
+
+## Changes
+
+### Feat
+
+- feat: improve the new shadcn based notifier error parsing
+- feat: add tracing to connectors with oauth suppport
+- feat: improve ups proxy auth error parsing
+- feat: migrate draft order form to shadcn and improve state management
+- feat: migrate shipments list and page to shadcn
+- feat: migrate orders list and page to shadcn
+- feat: migrate trackers list and page to shadcn
+
+### Fix
+
+- fix: fedex rates parsing condition to use explicit None check
+
+---
+
+# Karrio 2025.5rc19
+
+## Changes
+
+### Feat
+
+- feat: combine title and description for a more exhaustive seko commodity descriptions for customs declaration
+
+### Fix
+
+- fix: rendering loop issue in create_label form (by @Ansh-Dev-Nagar)
+- fix: inconsistent max text length between models and serializers
+
+---
+
+# Karrio 2025.5rc18
+
+## Changes
+
+### Feat
+
+- feat: add support for OpenTelemetry to Karrio server
+
+### Fix
+
+- fix: missing workflow-trigger table migrations
+
+---
+
+# Karrio 2025.5rc17
+
+## Changes
+
+### Fix
+
+- fix: resolved module import error for karrio.server.admin.schemas.orgs in tenant GraphQL schema
+- fix: enhanced UPS tracking status codes with comprehensive API documentation mapping
+- fix: optimize N+1 query issues in tracking/shipment GraphQL resolvers with proper relationship prefetching
+- fix: optimize N+1 query issues in constance configuration loading with bulk database operations
+- fix: optimize N+1 query issues in data archiving tasks with bulk deletion for organization links
+- fix: optimize N+1 query issues in carrier/organization access filtering for proxy endpoints
+- fix: optimize N+1 query issues in tenant domain/client lookups with relationship prefetching
+- fix: enhance all manager model querysets with organization relationship prefetching for multi-tenant mode
+- fix: improve archiving query performance with optimized existence checks and batch processing
+- fix: add database indexes for archiving date-based filters to reduce query execution time
+- fix: refactor workflow scheduler error handling with cleaner diagnostic functions
+- fix: add workflow-trigger table diagnostic migration for production database issues
+- fix: resolve APILog proxy model index conflicts in Django migrations
+
+---
+
+# Karrio 2025.5rc16
+
+## Changes
+
+### Fix
+
+- hotfix: document generation backward compatibility and improve document template editor
+
+---
+
+# Karrio 2025.5rc15
+
+## Changes
+
+### Feat
+
+- feat: integrate new shippers addons management page
+- feat: building the new dedicated karrio dev tools in a drawer
+- feat: update and improve carrier connection management for both users and admins
+- feat: improve DHL customs commodities data mapping
+- feat: clean up deprecated carrier connections, custom models
+- feat: build integration guide for AI agents piloted with Claude code and Gemini CLI
+- feat: update and improve account and organization management + migrate the Settings pages to shadcn+tailwindcss
+
+### Fix
+
+- fix: ratesheet loading mechanism regression
+- fix: canadapost shipment response parsing regression
+- fix: computed decimal values turned to 0.00 for float with a lower value
+
+### Chore
+
+- chore: QA and testing corrections for the release
+- chore: clean up new components with minimal responsive design
+- chore: refactor the karrio admin dashboard, removing trpc to work like the other pages
+- chore: fix conflicting next-auth dependencies version and platform build
+- chore: update the integration tests for GraphQL queries and mutation breaking changes + fix dashboard build
+- refactor: dashboard with `shadcn` upgrade and introducing Karrio Shippers product for multi-tenant instance manager
+
+---
+
+# Karrio 2025.5rc14
+
+## Changes
+
+### Fix
+
+- fix: sapient address mapping max charaters length.
+- feat: DTDC shipping_date parsing issue.
+
+---
+
+# Karrio 2025.5rc13
+
+## Changes
+
+### Feat
+
+- feat: upgrade ratesheet editor
+- feat: check for valid charge amount before returning selected rate
+- feat: DTDC carrier integration
+
+### Fix
+
+- fix: enforce check for admin dashboard access and enable it by default
+- fix: docker dashboard default setup
+- chore: update openapi schema and karriojs build
+
+### Docs
+
+- docs: update and cleanup supported carriers docs
+
+---
+
+# Karrio 2025.5rc12
+
+## Changes
+
+### Fix
+
+- fix: shipment menu
+- fix: create_label page loading race condition
+- fix: `partial_shipment_update` mutation for better shipment draft handling
+
+---
+
+# Karrio 2025.5rc11
+
+## Changes
+
+### Chore
+
+- feat: ensure transit and estimated_date from the selected_rate
+- fix: missing fedex signature option on rate request
+- fix: `RON` currency getting overriden
+- fix: `country-select` dropdown
+
+---
+
+# Karrio 2025.5rc10
+
+## Changes
+
+### Chore
+
+- chore: introduce 'setup-dev-env' for full end-to-end dev environment setup.
+
+> [!IMPORTANT]
+> This release is changing karrio's dashboard default port from `:3000` to `:3002`
+
+---
+
+# Karrio 2025.5rc9
+
+## Changes
+
+### Fix
+
+- hotfix: remove test hardcoded seko shipment selected_rate currency
+
+### Chore
+
+- chore: setup docker-compose.insiders.local.yml in root docker folder for centralized and simple insiders quick start.
+
+---
+
+# Karrio 2025.5rc8
+
+## Changes
+
+### Chore
+
+- chore: debug and update installation and deployment scripts for insiders packages
+
+---
+
+# Karrio 2025.5rc7
+
+## Changes
+
+### Fix
+
+- hotfix: document preview_url field causing admin access to templates to crash
+
+---
+
+# Karrio 2025.5rc6
+
+## Changes
+
+### Feat
+
+- feat: increase karrio API max size for commodities title and description and shipment reference to accomodate APIs that accept longer.
+- feat: update SEKO API fields to have new fields and increase text size
+
+---
+
+# Karrio 2025.5rc5
+
+## Changes
+
+### Feat
+
+- feat: capture selected rates costs post label purchase for detailed final prices
+- feat: update paperless trade integration for FedEx and UPS to ensure a uniform behaviour + fix UPS missing duty currency error
+
+### Docs
+
+- docs: update docs with support breakdown of shipments management product
+
+### Chore
+
+- chore: debug python packages action release and update docs
+
+### Fix
+
+- hotfix: python modules automated build and release
+- fix: fix docker-less installation with deploy script and publish the python module packages to pypi with a requirements.txt file that uses that.
+
+---
+
+# Karrio 2025.5rc4
+
+## Changes
+
+### Fix
+
+- fix: regression on label purchase for with preselected service
+
+---
+
+# Karrio 2025.5rc3
+
+## Changes
+
+### Feat
+
+- feat: improve entity logs and tracing record rendering
+- feat: build workflows and shipping rules management sections in the dashboard
+- feat: reorganized automation apps in the karrio dashboard for shipping rules and workflows
+- feat: shipping rules API integration
+- feat: add shipping rules panel to dashboard
+- feat(WIP): introduce shipping carrier integration agent based on Google ADK
+- feat(epic): introduce app-store + major dashboard refactor to shadcn
+
+### Fix
+
+- fix: karrio automation tests for workflow and background tasks
+- refactor: apply fixes based on multi-orgs testing
+- fix: broken forms and pages caused but react upgrade breaking changes
+
+### Chore
+
+- chore: fix regressions in karrio apps implementation + planning for the apps' full feature
+- chore: clean up docs discrepancies
+- chore: update ./bin/cli to target the updated module
+- chore: improve API docs
+- chore: fix clashing module imports in GraphQL utils
+- chore: clean up unused imports and reuse preloaded carriers ref
+- devx: reorganize dev env config and introduce karrio ai agent
+
+### Docs
+
+- docs: enrich multi-organization product documentation
+- docs: update products docs page and theme config
+- docs: Introduce products docs (https://karrio.io/docs/products)
+- blog: draft karrio edition difference, breakdown and explanation
+
+---
+
+# Karrio 2025.5rc2
+
+## Changes
+
+### Feat
+
+- feat: replace embedded API navigator from Redoc to Swagger for playground experience
+- feat: add preview_url computed field to document template object
+
+### Fix
+
+- fix: dashboard bugs -> orgs swtching + admin modal transparent background
+- fix: dashboard org switching in multi-org deployments
+- fix: invalid use of unstable_cache for dashboard multi-tenant routing
+- fix: breacking changes required update for pages in platform app
+- hotfix: Python packages static assets collection with pyproject.toml
+- hotfix: docker setup with ENABLE_ALL_PLUGINS_BY_DEFAULT to True by default
+
+### Chore
+
+- chore: ensure book demo is only on paltform site
+- chore: clean up web site tailwind styling
+- chore: add scarf to website
+
+### Docs
+
+- docs: add API development getting started docs
+
+---
+
+# Karrio 2025.5rc1 (Yayra Edition)
+
+## Changes
+
+### Feat
+
+- feat: Introduce a unified website for all karrio sites
+- feat: introduce plugins loader for karrio SDK
+- feat: add support for entrypoint plugin loader
+- feat: improve and finalize CLI docs generation
+- feat: enrich CLI with plugins management and carriers details fetching
+- feat: add connections and logs resources control from cli
+- feat: refactor dashboard autocomplete to work with Google API key
+- feat: remove deprecated carrier-specific models
+- feat: introduce karrio community as a submodule
+- feat: enrich carrier metadata and add carriers page to new site
+- feat: add tracer to settings so that Proxy and Mappers can access tracing context from settings. PS: You can also access the cache handler through settings
+- feat: add support for default value for optionEnum fields
+- feat: add support for path when creating extension using kcli
+- feat: make kcli installable
+
+### Fix
+
+- fix: dashboard page definitions with breaking changes, async signature on client components
+- fix: migrations backward compatibility issue
+- fix: non-failsafe address autocomplete plugin info loading
+- fix: race condition issue with carrier models loading
+- fix: nextjs upgrade breaking change for dynamic page metadata
+- fix: minor web section layouts
+
+### Chore
+
+- chore: update supported Python version to >=3.11
+- chore: replace deprecated extensions used in tests
+- chore: reorganize carrier extension plugins, separating actively maintained and mature integrations from community in-development ones
+- chore: fix compatibility with Python 3.12 and migrate from setup.py to pyproject.toml
+- chore: add changelog page and web page CI
+- chore: remove headless/ui dependency in favour of shadcn-powered components
+- chore: remove headless/ui to only use `shadcn/ui` components
+- chore: theme corrections and standardized
+- chore: migrate karrio live sites' content to the unified web app
+- chore: fix app dependencies
+- chore: setup plugin folder
+- chore: unify packages to React 18.x
+- chore: upgrade django constance and unmigrated status update
+
+### Devx
+
+- devx: enrich carrier integration, boilerplate generation, and examples
+- devx: setup cursor rules for better and AI drivven development
+
+### Docs
+
+- docs(WIP): document self-hosting
+- docs(WIP): improve integration and development docs
+- docs(WIP): introduce new carrier integration guide
+
+---
+
+# Karrio 2024.12.10
+
+## Changes
+
+### Fix
+
+- fix: usps rating API request filter and response transit_days parsing
+
+### Chore
+
+- chore: add tests for documents template and generation module
+
+---
+
+# Karrio 2024.12.9
+
+## Changes
+
+### Feat
+
+- feat: add support for commercial invoice upload as base64 to `seko` for international shipments.
+- feat: update seko shipping request with additional options
+- feat: add support for passing shipper and recipient instructions for supported carriers
+- feat: refactor `usps` extensions rating to use `Shipping Option 3.0` and enriched rate metadata (with zone and more)
+- feat: upgrade `usps` integration to `v2409` versions.
+- feat: collect rate zones for `ups`, `fedex` and `usps*`
+
+### Fix
+
+- fix: resolve warnings of the datetime library  (by @emmanuel-ferdman)
+- fix: for `fedex` shipment cancellation response parsing (by @leonowski)
+
+
+---
+
+# Karrio 2024.12.8
+
+## Changes
+
+### Fix
+
+- apply usps fix by @leonowski
+
+---
+
+# Karrio 2024.12.7
+
+## Changes
+
+### Fix
+
+- fix: deprecated `carrier.settings` field access
+- fix: Python namespace + submodule broken backward compatibility behaviour
+
+Breaking change to how the karrio SDK is loaded
+
+```python
+# Before
+import karrio
+
+# Now
+import karrio.sdk as karrio
+```
+
+
+---
+
+# Karrio 2024.12.6
+
+## Changes
+
+### Fix
+
+- fix: fix incorrect nip number (@DarkSwoop)
+
+---
+
+# Karrio 2024.12.5
+
+## Changes
+
+### Feat
+
+- feat: add integration_status to connectors metadata
+- feat: introduce codegen cli to replace old quicktype script
+- feat: make dhl_parcel_de label_type configurable
+- feat(WIP): app template
+
+### Fix
+
+- fix: remove shipping dates options from shipment during duplicate
+- fix: update dhl_parcel_de address data mapping based on feedback and API specs
+
+### Chore
+
+- chore: clean up left-over package named normalization
+- chore: improve alignment of code preview
+- chore: fix responsiveness across the platform website
+- chore: update script for ee dev setup
+
+
+---
+
+# Karrio 2024.12.4
+
+## Changes
+
+### Feat
+
+- feat: set fedex commodity values fallback to 0.0 when not provided
+- feat: Update pricing: increase Scale plan improve layout
+
+### Docs
+
+- docs: Update documentation: separate static collection step and database migration
+
+### Fix
+
+- fix: order duplicates issue happening on oss build
+- fix: dict utility parsing warning
+
+### Chore
+
+- chore: add tests for order_id duplication test
+- devx: "Remove pycairo dependency" (@ShaddyB1)
+
+---
+
+# Karrio 2024.12.3
+
+## Changes
+
+### Feat
+
+- feat: prevent Resize unconsequential event from causing full page crash
+- feat: remove DHL destination pre-check
+
+### Fix
+
+- fix: org creation bug and hidden organization config in insiders
+- fix: update default values caused by `constance` update
+
+### Chore
+
+- deploy: Karrio Platform build
+
+---
+
+# Karrio 2024.12.2
+
+## Changes
+
+### Fix
+
+- fix: dashboard build issue with next.config.js
+
+### Chore
+
+- chore: add tests for fedex phone number formatting
+
+---
+
+# Karrio 2024.12.1
+
+## Changes
+
+### Feat
+
+- feat: setup deployment for karrio-platform
+- feat: design platform config page
+- feat: introduce optional customs field to RateRequest unified model for future support of customs declaration at rate level
+- chore: update LICENSE to clarify directories exception as more and more insiders and ee code will be added to the core repository
+- feat: Introduce PRD and Documentation folder to improve AI editors understanding of the project
+- feat(WIP): reimplementing karrio admin with new stack trpc|tailwind|shadcn
+- feat: enrich and improve GraphQL interfaces for rate sheet management
+- feat: introduce @karrio/trpc and dedicated admin packages
+- feat: add user_count to system usage stats
+- feat: Introduce Karrio platform GrapQL client
+- feat: add new components for custom apps
+
+### Fix
+
+- fix: fedex phone number parsing with trimming (#768)
+- fix: admin header design
+
+---
+
+# Karrio 2024.12
+
+## Changes
+
+### Feat
+
+- feat: consolidate ups signature data mapping with live tests
+- feat: merge new events with existing ones while tracking event updates
+- feat: trigger webhook updates when the events list changes
+- feat: reset webhook `failure_streak_count` to 0 when re-enabled
+- feat: use direct SVG rendering for generic and unknown carrier logos
+
+### Fix
+
+- fix: custom carrier service reference parsing
+- fix: easyship rate other surcharges amount parsing
+- fix: seko error response parsing
+- fix: track-shipment-modal loading issue when references haven't been resolved yet
+
+---
+
+# Karrio 2024.12.rc12
+
+## Changes
+
+### Feat
+
+- feat: add `currency` to SEKO connection config
+
+### Fix
+
+- fix: `ups` delivery confirmation data mapping (#749)
+
+---
+
+# Karrio 2024.12.rc11
+
+## Changes
+
+### Fix
+
+- fix: seko package description truncation
+
+---
+
+# Karrio 2024.12.rc10
+
+## Changes
+
+### Fix
+
+- fix: seko tracking event parsing
+
+---
+
+# Karrio 2024.12.rc9
+
+## Changes
+
+### Feat
+
+- feat: fix wording in webhooks test modal
+- feat: make seko event Omnicode take precedence over default Code
+- feat: add `REDIS_PREFIX` for redis prefix configuration
+- feat: add more testing data sample for webhook testing
+
+### Fix
+
+- fix: docker entrypoints with proper DETACHED_WORKER flag check
+- fix: easyship simple tracking support
+
+### Chore
+
+- chore: add new carrier logos
+
+### Docs
+
+- docs: `REDIS_PREFIX` env documentation
+
+---
+
+# Karrio 2024.12rc8
+
+## Changes
+
+### Feat
+
+- feat: Add minimal webhook back off retries
+
+### Fix
+
+- fix: seko tracking event ordering
+
+---
+
+# Karrio 2024.12rc7
+
+## Changes
+
+### Feat
+
+- feat: clean up `SEKO` shipment meta to collecte delegated Carrier details
+
+### Fix
+
+- fix: document generator invalid closing statement
+
+
+---
+
+# Karrio 2024.12rc6
+
+## Changes
+
+### Fix
+
+- fix: `seko` tracking event date parsing
+- fix: karrio image default user set up
+
+---
+
+# Karrio 2024.12rc5
+
+## Changes
+
+### Fix
+
+- hotfix: `ups` delivery confirmation data mapping
+- hotfix: regression on document generation caused by invalid html.close on weasyprint
+
+---
+
+# Karrio 2024.12rc4
+
+## Changes
+
+### Feat
+
+- feat: add missing shipping options mapping for `ups` carrier
+- feat: add support for `usps*` https://developer-cat.usps.com/ API
+
+---
+
+# Karrio 2024.12rc3
+
+## Changes
+
+### Feat
+
+- feat: improve document generation by closing pdf writer
+- feat: ensure shipping date for `sapient` is set to UTC before applying next_business_day calculation
+- feat: Add new shadcn components for karrio UI kit
+
+### Fix
+
+- fix: oauth login error message parsing
+
+---
+
+# Karrio 2024.12rc2
+
+## Changes
+
+### Feat
+
+- feat: replace treepoem/ghostscript by zint/pyzint for barcode generation
+
+### Chore
+
+- chore: update Dockerfiles metadata
+- chore: update Dockerfiles away from deprecated env vars declaration
+- chore: handle oss install with dockerless
+
+### Fix
+
+- fix: dashboard runtime environment variables issues
+
+---
+
+# Karrio 2024.12rc1
+
+## Changes
+
+### Feat
+
+- feat(WIP): introduce new customizable dashboard with a new stack shacdn|tailwind|radix|tanstack
+- feat: Introduce advanced Karrio CLI features with API connectivity and data query
+- feat: make rate limit configurable using env vars (#589)
+
+### Fix
+
+- fix:`usps` API proxy and payment authentication (#709)
+- fix: version freeze git reference for `dockerless` install (#721)
+- fix: invalid reference useSystemConnection causing permission error (#706)
+- fix: Consolidate`fedex` duties payor definition with missing account number with live tests (#718, #697)
+- fix: issue with `shipping_date` and `shipment_date` being set to None and options getting overridden
+
+---
+
+# Karrio 2024.9.15
+
+## Changes
+
+### Fix
+
+- fix: `fedex` payor info data mapping #718
+- fix: easyship required defaults and max contact name size
+
+
+---
+
+# Karrio 2024.9.14
+
+## Changes
+
+### Feat
+
+- feat: switch export line item description to description (`dhl express`) @DarkSwoop
+
+---
+
+# Karrio 2024.9.13
+
+## Changes
+
+### Feat
+
+- feat: use actual city as fallback value for seko shipment state addresses
+
+### Fix
+
+- fix: fedex payment account numbers assignments
+
+### Chore
+
+- deps: add back pycairo as optional dependency on macos
+
+---
+
+# Karrio 2024.9.12
+
+## Fix
+
+- fix: missing dependencies in the build process
+
+---
+
+# Karrio 2024.9.11
+
+## Changes
+
+### Feat
+
+- feat: consolidate SEKO printlabel for EU shipments
+- feat: skip customs declaration for sapient when not international shipment
+- feat: add DAP incoterms
+- feat: make start-server script port configurable through env var
+
+### Chore
+
+- deps: add pycairo as dependency for document generation Macos compatibility
+
+---
+
+# Karrio 2024.9.10
+
+## Changes
+
+### Feat
+
+- feat: add support for additional seko_reference_*
+- feat: add rate_provider mapping to sapient integration and refactor sapient_carrier_code references to avoid clash with carrier_code reserved field
+- feat: Introduce document template options field for pre-rendering optimization
+
+### Fix
+
+- fix: shipment parsing when label generation fails but shipment creation succeeds
+
+---
+
+# Karrio 2024.9.9
+
+## Changes
+
+### Fix
+
+- hotfix: `ups` rate service charge parsing regression
+
+---
+
+# Karrio 2024.9.8
+
+## Changes
+
+### Fix
+
+- fix: `ups` product origin country code mapping
+- fix: `ups` `ups_worldwide_express` product code mapping
+
+---
+
+# Karrio 2024.9.7
+
+## Changes
+
+### Feat
+
+- feat: Add `system_usage` to base `graphql` types
+
+### Chore
+
+- remove deprecated `karrio.server.admin` module from OSS build
+
+---
+
+# Karrio 2024.9.6
+
+## Changes
+
+### Fix
+
+- fix: `ups` EU rate code parsing using context origin
+
+---
+
+# Karrio 2024.9.5
+
+## Changes
+
+### Feat
+
+- feat: Add `Duplicate Shipment` action to shipment menu (#680)
+
+### Fix
+
+- fix: `ups` TotalCharge parsing for `negotiated_rates` (#703)
+
+---
+
+# Karrio 2024.9.4
+
+## Changes
+
+### Feat
+
+- feat: Add `service_level` to `sapient` carrier connection settings
+
+---
+
+# Karrio 2024.9.3
+
+## Changes
+
+### Feat
+
+- feat: Add fallback values for `easyship` rate request `parcels.items`
+
+---
+
+# Karrio 2024.9.2
+
+## Changes
+
+### Fix
+
+- fix: `ups` TotalCharge parsing for `negotiated_rates`
+
+---
+
+# Karrio 2024.9.1
+
+## Changes
+
+### Chore
+
+- remove `strawberry-graphql-django` dependency as it is not fully integrate for the value it is supposed to provide
+
+---
+
+# Karrio 2024.9
+
+## Changes
+
+### Feat
+
+- feat: Easyship integration (#569)
+- feat: Add `pickup` support for `fedex` JSON API integration (#690)
+- feat: introduce `shipping_date` field of `datetime` type and deprecate `shipment_date` of `date` type to capture time for carriers that expect full future `datetime` ship date values.
+- feat: Add dhl_express content description for insurance (#694)
+
+### Fix
+
+- fix: `eshipper` carrier and services mapping (#675)
+- fix: `canadapost` non-uniq shipment group_id across account (#679)
+- fix: `fedex_ws` pickup request encoding (#690)
+- fix: organization GraphQL queries running on OSS build (#687)
+- fix: Nextjs cache build issue (#688)
+
+# Patch 2024.6.7
+
+## Changes
+
+### Fix
+
+- hotfix: `canadapost` group_id invalid string format #686
+
+
+# Patch 2024.6.6
+
+## Changes
+
+### Fix
+
+- fix: `canadapost` shipment identifier data mapping (#683)
+
+# Patch 2024.6.5
+
+## Changes
+
+### Devx
+
+-   devx: improve karrio docker container startup with healthchecks #684
+
+# Patch 2024.6.4
+
+## Changes
+
+### Feature
+
+- feat: Add field to unified class for future support of message level
+
+### Chore
+
+- chore: Add tests for `UPS` EU rates parsing
+- chore: make ups upper case for uniform charges details
+- chore: use localhost address for default `NEXT_PUBLIC_KARRIO_PUBLIC_URL` during build
+
+### Refactor
+
+- refactor: #673
+
+# Patch 2024.6.3
+
+## Changes
+
+### Feat
+
+-   feat: bootstrap `seko` carrier extension
+-   feat: prepare `seko` requests schemas
+-   feat: test drive `seko` request mapper implementation
+-   feat: compute next business `datetime` for sapient shipment_date
+
+# Patch 2024.6.2
+
+## Changes
+
+### Fix
+
+-   [Fixes](https://github.com/karrioapi/karrio/commit/4f26746ec34fd0bb41a6cef08def822eb21f3391) https://github.com/karrioapi/karrio/issues/667[: UPS ReferenceNumber changes](https://github.com/karrioapi/karrio/commit/4f26746ec34fd0bb41a6cef08def822eb21f3391)
+
+Special thanks to @mazzarito
+
+# Patch 2024.6.1
+
+## Changes
+
+### Feat
+
+-[feat: Add GraphQL queries and typings for apps](https://github.com/karrioapi/karrio/pull/656/commits/551c73dbfa5feb5c3f47cb49736ecb57f3460d6b)
+
+### Refactor
+
+-   refactor: dashboard extracting non-routing code and dependencies to `@karrio/core` package
+-   [refactor: dashboard from Nextjs page router to app router](https://github.com/karrioapi/karrio/pull/656/commits/8d0e2feec8c284b7f5bb577ea0b0a50b727001c2)
+
+### Chore
+
+-   [chore: deprecate apps module from OSS build](https://github.com/karrioapi/karrio/pull/656/commits/e115dddee06d498d5ad5a6de0b21094e528dfc53)
+-   [chore: introduce CHANGELOG.md](https://github.com/karrioapi/karrio/commit/df9a232d7df0e9fdbb89b915a9ef546637d60dd1)
+
+---
+
+# Karrio OSS 2024.6
+
+> [!IMPORTANT]
+> Thank you for your patience as I go through a time of workload adjustment between my new role and the maintenance of Karrio. [Read my community announcement here](https://github.com/orgs/karrioapi/discussions/585)
+
+### Feat
+
+-   refactor: dashboard extracting non-routing code and dependencies to `@karrio/core` package
+-   [refactor: dashboard from Nextjs page router to app router](https://github.com/karrioapi/karrio/pull/656/commits/8d0e2feec8c284b7f5bb577ea0b0a50b727001c2)
+-   [feat: apply utc timezone to sapient integration ship date](https://github.com/karrioapi/karrio/commit/06e378d6eada14f10c91138078caad4d9f122e25)
+-   [feat: add support for FedEx scan events multi-datetime formats](https://github.com/karrioapi/karrio/pull/655/commits/2039e5d51523f368dbbee1b0d8e631eed2b1b347)
+-   [feat: handle shipment_date update when passed upstream instead of per extension implementations](https://github.com/karrioapi/karrio/pull/655/commits/0d73add6247ed558b3068f817bcdda173d0d11c8)
+-   feat: add `karrio.lib` to document template context
+-   feat: Disable "note" alert types as previously done in `fedex_ws` #638
+-   feat: rename legacy USPS extensions to `usps_wt` (for USPS Web Tools)
+-   feat: Carrier Connection REST API #582
+-   reat: [carrier-integration | interoperability] SAPIENT #633
+-   feat: FedEx Tracking should be giving us the `signed_by` #635
+-   feat: USPS REST API integration
+-   feat: Handle defaulting size units to LB/IN for UPS US rates and shipment requests
+-   feat: add a description field to parcel forms
+-   feat: add missing per package description data mapping to `ups` extension
+-   feat: cherry-pick `hay_post` integration
+-   feat: Finalize `eShipper` new API integration
+-   feat: add back FedEx tracking POD image
+-   feat: add workspace config for automatically applying insurance to full package value
+-   feat: add support for metadata link rendering
+-   feat: Add standardized flag for all supported carriers
+-   feat: expose return_address to GraphQL and API specs and generated clients
+-   feat: Add return address to create label forms across the dashboard
+-   Introduce the `return_address` field
+-   feat: Add Django admin editor for document templates
+-   feat: Add support for env config of Redis username and password (#564)
+-   feat: Bootstrap new `eshipper` API extension
+-   feat: Make cache available to all connection settings
+-   feat: add `carrier_id` to the `POST /v1/proxy/shipping/{carrier_name}/cancel` to allow precise carrier account selection for the operation. #590
+-   feat: Enhance Documents REST API with support for template management CRUD operations and generic document generator API in addition to Trade API upload API. #581
+
+### Fix
+
+-   fix: `eshipper` cancel shipment request, and add special cancel error handling for undocumented errors
+-   fix: `eshipper` `datetime` requirement for ship date and update tests for order cancellation
+-   fix: tracker filter to return tracker if already existent
+-   fix: `fedex` tracking estimated delivery date response parsing
+-   fix: migration defaulting to hardcoded `eshipper` for `carrier_name`
+-   [fix: sapient shipment cancellation response parsing](https://github.com/karrioapi/karrio/commit/660e397eb473096dc4bfc3d22eb8dcdeb3823dca)
+-   [Fix FedEx multi shipment creating multiple of packages](https://github.com/karrioapi/karrio/pull/655/commits/9597f2fdfa187f1e2f7dc30583e4e05f46b33a3c)
+-   [fix: invalid language and lang field default state assignment](https://github.com/karrioapi/karrio/commit/f7c1be38323853d0a61af4e7b7ff8d35b58cee73)
+-   [fix: eshipper carrier data parsing for both rating and shipping response data](https://github.com/karrioapi/karrio/commit/58f37b190d0bbb9bcf3a59a067b74e2b4cb5c9fa)
+-   [fix: debug and consolidate eshipper shipment cancellation with live tests](https://github.com/karrioapi/karrio/commit/e333436e29dff9718068c1d580fd43c2cd2310ac)
+-   [fix: connection data parsing when saving tracing records](https://github.com/karrioapi/karrio/commit/3ff91671982a9b763d976f815a9ec40509b99635)
+-   [feat: handle fedex max contact and company name](https://github.com/karrioapi/karrio/commit/71de4b7fba324ee661935a90888175b7bf792fcb)
+-   fix: `usps` API token missing scope
+-   fix: eShipper server URL for production mode and label problem
+-   [hotfix: add fallback values to SAPIENT shipment request](https://github.com/karrioapi/karrio/commit/1fc830346f0653aefb89ed896f8817a32a1a978b)
+-   fix: consolidate SAPIENT integration with live tests
+-   fix: `eshipper` dimension parsing requirements
+-   hot-fix(`2024.6-rc24`): migration race condition issue #645
+-   clean up: remaining usage of deprecated `providers.MODELS` dynamic object created by old carrier settings models
+-   hot-fix for `2024.6-rc24`: regression on carrier configuration `test_mode` assignment for carrier connection registration in live mode.
+-   fix: Incorrect Item Quantity Distribution in Multi-Package Orders #634
+-   fix: `eshipper` database migration leaving orphan carrier data
+-   fix: #628
+-   fix: authenticated requests race condition issues
+-   fix: Dashboard environment variables configuration breaking change
+-   fix: dashboard Nextjs undefined env var caused by deprecated environment Configs
+-   fix: shipment sample fallback on document generation module
+-   fix: cancel shipment `carrier_id` check
+-   fix: UPS Saturday delivery option flag mapping
+-   fix: FedEx variableOptions fallback value to None
+-   fix: regression on FedEx shipping options parsing
+-   fix: regression of quicktype schema type generation commands
+-   fix: FedEx `"variableOptions"` format issue
+-   fix(2 birds): cache declaration leftovers and tracing record saving failing due to cache handle
+
+### Docs
+
+-   docs: Update API specs and generate API docs
+-   docs: update API docs with new return_address support
+-   docs: setup `docusaurus` `docusaurus-openapi-docs` plugin
+-   docs: Improve generated OpenAPI with annotation
+
+### Chore
+
+-   [chore: deprecate apps module from OSS build](https://github.com/karrioapi/karrio/pull/656/commits/e115dddee06d498d5ad5a6de0b21094e528dfc53)
+-   [chore: handle `eshipper` credential transfer from username|password to principal|credential](https://github.com/karrioapi/karrio/commit/536fc037860d04cac648963e7dd038399cd7296e)
+-   [chore: fix generic carrier configration parsing](https://github.com/karrioapi/karrio/commit/3ef15ca26d9a7d108f6cdceb411e94df060cae11)
+-   [chore: fix docs generation and docusaurus dependencies](https://github.com/karrioapi/karrio/commit/e5dd6978569d7c6987d080e875c2b67843091754)
+-   [chore: improve enum typing for lang and language configs for connectors and handle default values for carrier registration modal](https://github.com/karrioapi/karrio/commit/5a40c51755874359fc9f3356b79c18e14628d352)
+-   [refactor: carrier proxies to only be generated for django admin and prevent migration requirement](https://github.com/karrioapi/karrio/commit/6889a8245eb8091d02e05644a046815f7798cc7c)
+-   chore: update create_label component formatting
+-   chore: update API tests for the return_address field
+-   chore: update unit tests for the new return_address field
+-   chore: update Readme dashboard illustration
+-   chore: Apply minimal query optimization
+-   chore: Prevent backup file creation from `sed` command
+-   chore: investigate Admin user creation issue: `/admin/user_accounts trying to add a new user account does not get added`
+
+### Breaking changes
+
+-   feat: add daytime precision to tracking event time format (`AM/PM`)
+-   feat: remove deprecated `eshipper_xml` extension
+-   Rename legacy extension `eshiper` -> `eshipper_xml` to prepare for the upgrade to the new eShipper API
+-   The Electronic Trade Document upload API was changed from `POST /v1/documents` to `POST /v1/documents/uploads`
+-   The `GET /v1/documents` endpoint returning ETD upload records is now `GET /v1/documents/uploads`
+
+> [!CAUTION]
+> Please make sure to update your deployment environment variables for the dashboard when upgrading to `rc10 +`
+> Check out the docs here and the following files to make sure you have the right environment variables especially if you are not using our public docker-compose files and have a custom deployment or hosted on something live Vercel.
+>
+> -   [Dashboard env config](https://docs.karrio.io/product/self-hosting/environment/#karrio-dashboard)
+> -   Local dev [docker-compose.yml](https://github.com/karrioapi/karrio/blob/main/docker/docker-compose.yml)
+> -   Hobby [docker-compose.hobby.yml](https://github.com/karrioapi/karrio/blob/main/docker/docker-compose.hobby.yml)
+
+Special thanks to contributors: @ChrisNolan (🎉 first contribution), @jacobshilitz and @david-kocharyan
+
+### 🚀 Celebrating a new sponsor: @alissonf216
+
+---
+
+# Karrio patch 2024.2.17
+
+## Changes
+
+### Fix
+
+-   fix: FedEx duplicate tracking issue trackReplys selection
+
+---
+
+# Karrio patch 2024.2.16
+
+## Changes
+
+### Fix
+
+-   fix tracking document view conflicting name causing crash when a tracker has signature or delivery image
+
+---
+
+# Karrio patch 2024.2.15
+
+## Changes
+
+### Feat
+
+-   feat: Identify and ensure all required FedEx Intl data are provided according to sandbox samples
+-   feat(SDK): Introduce computed `total_value` fields for Products, Package and Packages unit decorators
+
+### Fix
+
+-   fix: background tracking potentially None value and save related tracing records
+
+---
+
+# Karrio patch 2024.2.14
+
+## Changes
+
+### Feat
+
+-   feat(TGE): Add support for Multi-piece shipment
+
+### Fix
+
+-   fix(#551): Invalid customs commodities assignment
+    # Karrio patch 2024.2.13
+
+## Changes
+
+### Feat
+
+-   feat: Add support for custom app website URL for white labelled tenant
+-   feat: Apply workspace config as default tax_ids to shipper address forms
+
+### Fix
+
+-   fix(USPS): phone number parser to handle None values# Karrio patch 2024.2.12
+
+## Changes
+
+### Fix
+
+-   fix(USPS\*): missing required PASSWORD request properties# Karrio patch 2024.2.11
+
+## Changes
+
+### Fix
+
+-   fix: Missing required NumberIssuerCountryCode for DHL Express
+-   fix(USPS): shipment request invalid data formatting
+    # Karrio patch 2024.2.10
+
+## Changes
+
+### Feat
+
+-   feat: Add customs declaration to `fedex` rate request for international shipments# Karrio patch 2024.2.9
+
+## Changes
+
+### Fix
+
+-   fix: TGE missing item description fallback value
+-   fix: Fedex shipping invalid extra shipper.accountNumber and soldTo fields and provided fallback values for required phone numbers.# Karrio patch 2024.2.8
+
+## Changes
+
+### Fix
+
+-   fix(fedex): Signature option type# Karrio patch 2024.2.7
+
+## Changes
+
+### Feat
+
+-   feat: Add missing ACCOUNT to `fedex` rate types
+-   feat: Make default `fedex` rate request types configurable
+
+### Fix
+
+-   fix: Set a fallback value for `TGE` package description
+-   fix: responsiveness for shipments and orders page headers
+    # Karrio patch 2024.2.6
+
+## Fix
+
+-   hot-fix(`fedex`): add valid `subPackagingType` Enum# Karrio patch 2024.2.5
+
+### Fix
+
+-   `sscc` calculation for `TGE` integration# Karrio patch 2024.2.4
+    > [!WARNING]
+    > Watchout for breaking change with candapost extension. Now by default shipment are not submitted meaning you need to create a manifest to complete you shipment before pickup or dropoff.
+
+## Hot Fix
+
+-   Rollback problematic canadpost config migration introduced in 2024.2.3
+
+### Breaking change
+
+-   `candapost` shipping now require manifesting step unless you update your connection config to set `Submit shipment by default` to true.
+
+---
+
+# Karrio patch 2024.2.3
+
+## Changes
+
+### Feat
+
+-   feat: Add support for marking any shipment without tracker with manual status
+-   feat: Introduce manifest_required flag for carriers with manifest support
+-   feat: Add Manifest `GraphQL` queries and manifest management page
+-   feat: Add form for manifest creation based on selection
+-   feat: consolidate `canadapost` manifest integration with live tests
+
+### Chore
+
+-   chore: Remove deprecated Customs CRUD APIs
+-   ~~chore: Apply `transmit_shipment_by_default` for all existing `canadapost` connections~~# Karrio patch 2024.2.2
+
+## Changes
+
+-   fix: Improve TGE pickup date default value + sscc and shipment_id calculation
+-   feat: Remove lowercase styling on APP_NAME login page
+-   feat: hide sensitive email sending error from bubbling up to frontend
+-   merge: @jacobshilitz [fix password reset to use EMAIL_FROM_ADDRESS as sender](https://github.com/karrioapi/karrio/pull/540/commits/254a68fdfff288816c7ebea128978ba91f9e1a60)# Karrio patch 2024.2.1
+
+## Hot Fix
+
+-   fix: react hooks bug caused by invalid return type" "v2024.2.rc9
+
+### What's Changed
+
+-   Automated build by @danh91 in https://github.com/karrioapi/karrio/pull/526
+-   chore(deps): bump jwcrypto from 1.5.4 to 1.5.6 by @dependabot in https://github.com/karrioapi/karrio/pull/527
+-   Debug automated build by @danh91 in https://github.com/karrioapi/karrio/pull/528
+-   [hot-fix] fedex smartpost requests by @danh91 in https://github.com/karrioapi/karrio/pull/529
+
+**Full Changelog**: https://github.com/karrioapi/karrio/compare/v2024.2.rc8...v2024.2.rc9" "v2024.2.rc8
+
+### What's Changed
+
+-   [hot-fixes] Hot fix 2024.2rc by @danh91 in https://github.com/karrioapi/karrio/pull/525
+
+**Full Changelog**: https://github.com/karrioapi/karrio/compare/v2024.2.rc7...v2024.2.rc8" "v2024.2.rc7
+
+### What's Changed
+
+-   [patch] allied-express-local by @danh91 in https://github.com/karrioapi/karrio/pull/517
+-   chore(deps): bump cryptography from 42.0.0 to 42.0.2 by @dependabot in https://github.com/karrioapi/karrio/pull/518
+-   chore(deps): bump cryptography from 42.0.2 to 42.0.4 by @dependabot in https://github.com/karrioapi/karrio/pull/519
+-   [release] Karrio 2024.2 by @danh91 in https://github.com/karrioapi/karrio/pull/520
+
+**Full Changelog**: https://github.com/karrioapi/karrio/compare/v2024.2.rc5...v2024.2.rc7" "v2024.2.rc5
+
+### What's Changed
+
+-   [carrier-integration] Allied express local integration by @danh91 in https://github.com/karrioapi/karrio/pull/511
+-   [carrier-integration] Deutsche Post by @danh91 in https://github.com/karrioapi/karrio/pull/512
+-   Minor fixes by @danh91 in https://github.com/karrioapi/karrio/pull/513
+-   [hotfix] Rename `deutschepost` -> `dhl_parcel_de` by @danh91 in https://github.com/karrioapi/karrio/pull/514
+-   chore(deps): bump django from 4.2.8 to 4.2.10 by @dependabot in https://github.com/karrioapi/karrio/pull/515
+-   feat: Australiapost full integration by @danh91 in https://github.com/karrioapi/karrio/pull/508
+-   docs: Documentation update for 2024.2 release by @danh91 in https://github.com/karrioapi/karrio/pull/516
+
+**Full Changelog**: https://github.com/karrioapi/karrio/compare/v2024.2.rc4...v2024.2.rc5" "v2024.2.rc10
+
+### What's Changed
+
+-   chore(deps): bump weasyprint from 61.0 to 61.2 by @dependabot in https://github.com/karrioapi/karrio/pull/530
+-   [hot-fixes] Publish Karrio 2024.2 by @danh91 in https://github.com/karrioapi/karrio/pull/522
+
+**Full Changelog**: https://github.com/karrioapi/karrio/compare/v2024.2.rc9...v2024.2.rc10# Karrio Shipping Platform Edition 2024.2
+
+> [!IMPORTANT]
+> 🥳 Karrio 2024.2 is officially finally out. Chat with us on [Karrio Launch Week](https://www.karrio.io/launch-week-x) to learn more about our vision for 2024
+
+### Feat
+
+-   Introduce Karrio Manifest API
+-   Introduce Karrio dashboard home page with usage stats and guidance
+-   Australia Post full integration (rating, label generation)
+-   DHL Parcel Post integration (upgrade from the `dpdhl` integration planned for sunsetting)
+-   FedEx REST API integration (upgrade from former FedEx web service integration)
+-   Add support for dynamic options field generation in label generation forms
+-   Add support for FedEx Smart Post rating and label creation
+-   Introduce bulk shipment fulfilment
+-   Upgrade creating objects by id to use `dict` instead of plain `string`
+-   Refactor and improve loading flow for create_label forms
+-   Introduce Workspace config object with GrapQL API support
+-   Introduce manifest interface to Karrio SDK
+-   Separate profile from account settings and introduce workspace config form
+-   Preload customs declaration options using saved workspace configs
+-   Add zones column to rate sheet
+-   Introduce TGE extension
+
+### Breaking Changes
+
+-   Move legacy FedEx web service integration as fedex_ws extension
+-   Remove the deprecated suburb field from the Address object
+
+### Fix
+
+-   fix: FedEx WS rating issue caused by SmartPost changes
+-   fix: Allied Express min volumes
+-   fix: DHL Express `customs.options` mapping
+
+### Docs
+
+-   Improve documentation navigation and document karrio environment + new products + enrich FAQ (WIP)
+-   Introduce carrier documentation with details for capabilities, shipping options and services
+-   document local development installation requirements for cloud VMs
+    # Karrio preview 2024.2.rc4
+    > [!IMPORTANT]
+    > You can safely upgrade to this release same as previous patches. I have decided to name it Preview as it is the pre-release to the upcoming major `2024.2` release. I still recommend testing with the staging instance before updating your production instance.
+    > I have been trying to work with short-lived branches where I lay the foundations for epic features and iterate faster. It is less overwhelming and allows for quick iteration. And makes it easy to solve issues and release patches more often.
+
+### Feat
+
+-   Add `metadata_value` and `metadata_key` filter for carrier connections
+-   Add brand colour config support to allied_express connection configs
+-   Replace`dpdhl` GET tracking request with POST
+-   Add support for rate sheet object management (WIP)
+
+### Fix
+
+-   fix `easypost` tracking response parsing
+-   fix `ups` invalid property added to `third_party` payment declaration
+-   fix `metadata_key` filter queryset for GraphQL resolver
+
+---
+
+# Karrio preview 2024.2.rc3
+
+> [!IMPORTANT]
+> You can safely upgrade to this release same as previous patches. I have decided to name it Preview as it is the pre-release to the upcoming major `2024.2` release. I still recommend testing with the staging instance before updating your production instance.
+> I have been trying to work with short-lived branches where I lay the foundations for epic features and iterate faster. It is less overwhelming and allows for quick iteration. And makes it easy to solve issues and release patches more often.
+
+### Feat
+
+-   Improve generic carrier brand colour rendering
+-   Make allied express `service_type` and `account_service_type` config plain text input fields
+
+### Chore
+
+-   fix orders and shipments list styling
+
+---
+
+# Karrio preview 2024.2.rc2
+
+> [!IMPORTANT]
+> You can safely upgrade to this release same as previous patches. I have decided to name it Preview as it is the pre-release to the upcoming major `2024.2` release. I still recommend testing with the staging instance before updating your production instance.
+> I have been trying to work with short-lived branches where I lay the foundations for epic features and iterate faster. It is less overwhelming and allows for quick iteration. And makes it easy to solve issues and release patches more often.
+
+### Feat
+
+-   Add `metadata_value` and `metadata_key` filter for carrier connections
+-   Add brand colour config support to allied_express connection configs
+-   Replace`dpdhl` GET tracking request with POST
+-   Add support for rate sheet object management (WIP)
+    # Karrio preview 2024.2.rc1
+    > [!IMPORTANT]
+    > You can safely upgrade to this release same as previous patches. I have decided to name it Preview as it is the pre-release to the upcoming major `2024.2` release. I still recommend testing with the staging instance before updating your production instance.
+    > I have been trying to work with short-lived branches where I lay the foundations for epic features and iterate faster. It is less overwhelming and allows for quick iteration. And makes it easy to solve issues and release patches more often.
+
+### Feat
+
+-   bulk order fulfilment processing on the dashboard
+-   Introduce draft order creation form
+-   add type details for shipping options
+-   Introduce a home page with usage stats and action guidance
+-   add bulk label and invoice printing for orders
+-   add bulk label and invoice printing for shipments
+-   redesign: orders and shipments layout and info
+-   Add API usage graph to developers' overview page
+-   Make the Allied Express server URL configurable
+-   Add brand and text colour configuration for generic carriers
+-   Improve order processing with batches API allowing attaching new batch operations for existing orders
+-   Improve shipment processing with batches API to allow linking new batch operation with existing shipment by id
+-   Add support for `brand_color` and `text_color` for generic carrier config
+-   Introduce `images` to the tracker for signature and delivery images
+-   Expose `delivery_image_url` and `signature_image_url` to OpenAPI and GraphQL API
+-   Add proof of delivery image support for UPS tracking
+
+### Fix
+
+-   fix: Adming queries for system usage stats
+-   fix: ZPL label `dpmm` for preview
+-   fix: duplicated carrier gateway call bug
+
+### Chore
+
+-   chore: clean up lists layout
+-   chore: Clean up `create_label` form and state management
+
+### Breaking changes
+
+-   The document generation API endpoint has been replaced from `/documents/` -> `documents/templates/`
+
+### Celebrating Karrio's newest sponsor 🥳 🎉 🎉
+
+Thanks, @DarkSwoop for sponsoring Karrio 🙏🏿
+
+---
+
+# Karrio patch 2023.9.13
+
+## Changes
+
+### Feat
+
+-   feat: Add workflow webhook URL
+-   feat: reorganize workflow action data to provide dedicated tabs for input, output logs and details
+-   feat: Introduce `metafields` and link to workflow objects
+-   feat: Improve workflow execution data flow and tracing
+-   feat: Add support for workflow conditional action and single action execution
+-   feat: Add support for Posthog on the API, dashboard and docs
+
+### Fix
+
+-   merge: Use HS code for DHL Express customs declaration by @DarkSwoop
+-   USPS label response conditional parsing when errors are returned and set defaults for secondary address lines #491
+
+Special thanks to @DarkSwoop for the valuable feedback from DHL contacts that helps improve Karrio's DHL express extension# Karrio patch 2023.9.12
+
+## Feat
+
+-   Add pending status to karrio SDK to handle event code when a package hasn't been picked up and can still be cancelled
+-   Add admin module to OSS build
+-   Move action buttons to the header on the developers' sub-section
+-   Add basic CRUD operation for system carrier management
+-   Prepare rate sheets management card
+-   Add staff permission management admin APIs
+-   Add minimal staff user management functionalities to the admin dashboard
+-   Introduce and configure `strawberry_django` optimizer
+-   Introduce karrio automation panels to the dashboard
+-   Finalize beta workflow creation form in the dashboard
+
+## Chore
+
+-   Separate core Graphql types and queries from ee
+-   Add sponsors section to README
+
+## Fix
+
+-   Easypost Fee parsing issue
+-   Add omitted customs cancel request options
+-   Fix grammatical and sentence structure errors in the OpenAPI schema page
+
+I am particularly excited about karrio built-in automation. The vision is to simplify syncing data between karrio and other platforms.
+I have been asked for integrations with platforms such as Shopify, Woocommerce, Commercetools and various ERP systems to sync orders and relevant data across the systems. With karrio built-in automation, I hope to tackle that with the least amount of work.
+
+Shout out to Fadi owner at [Shipr](https://www.shipr.com.au/) as we collaborate to make Karrio a turnkey solution for 3PLs and logistics providers.
+With this, they will be able to deploy their dedicated shipping platform, automate shipping but, also empower their merchants and customers with their own workspace and API access. In addition to our API and Webhook, it will be even easier to integrate karrio and build your custom shipping tech stack.
+
+Reach out for private beta access to [Karrio Cloud](https://www.karrio.io/)
+
+<p align="center">
+  <img width="400" alt="Screenshot 2023-12-31 at 12 35 14 AM" src="https://github.com/karrioapi/karrio/assets/10974180/154c9448-4335-433c-b3a3-e584f795a199"/>
+  <img width="400" alt="Screenshot 2023-12-31 at 12 34 48 AM" src="https://github.com/karrioapi/karrio/assets/10974180/2b17c8b8-9732-4ded-9f41-e4788d8554c3"/>
+  <img width="400" alt="Screenshot 2023-12-31 at 12 34 27 AM" src="https://github.com/karrioapi/karrio/assets/10974180/353c856c-9774-470d-8f4e-ec2984c1dead"/>
+</p>
+
+---
+
+# Karrio patch 2023.9.11
+## Feat
+
+-   Add rating and label generation to sendle integration
+
+## Chore
+
+-   (merge) @jacobshilitz fix for API logs index
+-   (merge) @jacobshilitz fix for `vscode` path updates
+-   (fix) canadapost multi-piece shipment parsing
+
+Special thanks to @jacobshilitz for the powerful performance fix for API log indexes 🔥 # Karrio patch 2023.9.10
+
+## Feat
+
+-   Add allied express service listing on the connection config modal# Karrio patch 2023.9.9
+
+## Feat
+
+-   (improve) addresses and parcel listing page layouts to handle large numbers
+-   (add) support for live address full search on name input
+-   (update) name input to autocomplete with headless UI Combobox component# Karrio patch 2023.9.8
+
+## Changes
+
+-   (fix) dashboard org switcher inconsistency on the frontend
+-   (add) meaningful defaults for rate and label generation requests of `allied_express` extension
+-   (introduce) RateSheet object (reusable dedicated rate sheet object that can be linked to various carriers with custom sheet content)
+-   (add) GraphQL APIs to manage rate sheets# Karrio patch 2023.9.7
+
+## Changes
+
+-   (improve) UX and design consistency across the dashboard
+-   (add) new carrier integration for Allied Express
+-   (fix) missing fixed weight unit for canadapost customs item definition
+-   (merge) @DarkSwoop paperless trade filter fix
+-   (add) unit tests for non-supported paperless trade shipment # Karrio patch 2023.9.6
+-   (fix) `dhl_express` option parsing and filter# Karrio patch 2023.9.5
+-   (fix) issues with dynamically set `paperless_trade` option and `dhl_express_all`
+-   (add) support for shipment messages parsing for `easypost`
+-   (fix) `asendia_us` connection configuration requirements# Karrio patch 2023.9.4
+
+### Changes
+
+-   Introduce the Karrio admin server module with an admin GraphQL API
+-   Lay the foundation of the Karrio admin dashboard in the same codebase as the current dashboard# Karrio patch 2023.9.3
+-   (fix) **DEFAULT_SERVICE** imports for carriers with custom rate sheets
+-   (fix) `dhl_express` paperless trade option processing# Karrio patch 2023.9.2
+-   (refactor) Enum types and various usages due to related breaking changes in `Python 11`
+-   (update) docker base images to `python:3.12-slim` and development image to `python:3.12-slim-bullseye` to improve development on Mac M chips# Karrio patch 2023.9.1
+-   (merge) `dhl_express` dutiable fix by @DarkSwoop
+-   (fix) canadpost multi-piece shipping cancellation options
+-   (update) vulnerable dependencies
+
+Special thanks to @DarkSwoop # Karrio Shipping Platform Edition 2023.9
+
+## Changes
+
+-   Canada Post multi-piece shipment support [#392](https://github.com/karrioapi/karrio/issues/392)
+-   [carrier-integration] GEODIS (full integration) [#390](https://github.com/karrioapi/karrio/issues/390)
+-   [carrier-integration] Colissimo [#389](https://github.com/karrioapi/karrio/issues/389)
+-   [carrier-integration] BPost [#435](https://github.com/karrioapi/karrio/issues/435)
+-   [carrier-integration] TNT (full integration) [#425](https://github.com/karrioapi/karrio/issues/425)
+-   [carrier-integration] Asendia US (full integration) [#163](https://github.com/karrioapi/karrio/issues/163)
+-   (POC) of integration compatibility for `zoom2u` and `locate2u` last mile systems
+-   (replace) `amazon_mws` extension by `amazon_shipping`
+-   (remove) `yanwen`, `yunexpress` and `sf-express` extensions
+-   (clean) up background job tracing
+
+### Dev ex
+
+-   Remove commercial license code leaving the repository with only **Apache v2 OSS** edition server modules
+-   Major repository restructuration moving toward a **monorepo** with **server**, **dashboard** and **docs** under karrio's main repository
+-   Deprecate separate schema packages for carriers in favour of moving the schemas and generated types directly into the carrier's extension packages
+-   Improve Karrio CLI extension template
+
+---
+
+# Karrio patch 2023.5.3
+
+-   DHL Universal - Error when adding DHL eCommerce tracker. [#439](https://github.com/karrioapi/karrio/issues/439)
+-   DHL Express - IsDutiable determination [#437](https://github.com/karrioapi/karrio/issues/437)
+-   Paperless Trade - Missing document format using webinterface [#438](https://github.com/karrioapi/karrio/issues/438)# Karrio patch 2023.5.2
+-   [dev-ex] Set up build from source [#416](https://github.com/karrioapi/karrio/issues/416)
+-   [DHL-Conflict] Pickup XML request issue [#414](https://github.com/karrioapi/karrio/issues/414)
+-   Fix Tracking API 500 issue [#410](https://github.com/karrioapi/karrio/issues/410)
+-   Merged UPS multi-parcel individual weight [#418](https://github.com/karrioapi/karrio/pull/418)
+
+Thanks to @jacobshilitz for the quick fix# Karrio patch 2023.5.1
+
+-   Ensure cache params are optional with a default value
+-   Handle auth token error parsing
+-   Disable DHL Express dutiable flag for EU countries
+-   Fix / Improve DPDHL Error
+
+Special thanks to @nahall for the USPS service update# Karrio Shipping Platform Edition 2023.5
+
+## Changes
+
+-   (upgrade) UPS API integration to the latest #387
+-   (fix) intermittent issue with Canada Post options #381
+-   (add) configurable options to FedEx and DHL express connections
+-   (fix) carrier config mutation regression
+-   (add) metadata to tracker POST API request data
+-   (fix) DHL express `"DOC"/"NONDOC"` #367
+-   (remove) support for UPS Freight
+
+### Updating to UPS REST API with Oauth2 authentication
+
+**UPS and deprecating their XML and JSON legacy APIs in favour of their new REST API with Oauth2 support. You will need to update your Carrier connection with your app `client_id` and `client_secret`**
+
+_follow these instructions to get your new API credentials_
+
+-   Visit [https://developer.ups.com/apps?loc=en_US](https://developer.ups.com/apps?loc=en_US)
+-   Create a new app
+-   Copy your `client_id` and `client_secret` to update your karrio's UPS connections
+
+<details>
+  <summary>app creation screenshots</summary>
+  <img src="https://github.com/karrioapi/karrio/assets/10974180/82d07d6e-a754-41d5-8260-f38cfa67e812" alt="Screenshot 2023-06-04 095624" width="600" />
+  <img src="https://github.com/karrioapi/karrio/assets/10974180/cf60f949-02fe-4f85-a6a0-0721ca0d704b" alt="ups-app-creation-setup" width="600" />
+  <img src="https://github.com/karrioapi/karrio/assets/10974180/e91beb7e-10e1-495e-af81-80535d63521d" alt="ups-app-credentials" width="600" />
+</details>
+
+---
+
+# Karrio 2023.4.6 patch
+
+## Fixes
+
+-   (fix) organization invite on multi-tenant deployments
+-   (fix) Canada post falsy options mapping #381
+-   (fix) FedEx transit day resolution excluding weekends
+-   (simplify) computed address_lines (combining street_number with street_name)
+-   (fix) duplication in combined packages description
+    # Karrio 2023.4.4 patch
+
+## Changelog
+
+-   (merge) #372
+-   (fix) #370
+-   (fix) #333 -> a way to handle service suffixes
+-   (add) migration fix for tracker info data
+-   (add) DHL prefix to native dhl_express service code and filter
+-   (introduce) `packstation` as an explicit option and adjust DPDHL
+-   (introduce) `service_suffix` config for fixed service suffix with DPDHL
+-   (fix) tracker info update
+-   (fix) misspelled carrier_tracking_link mapping for shipment tracker
+-   (update) tracking status computation to support new statuses and prevent `in_transit` override
+    # Karrio 2023.4.2 patch
+-   (fix) DPDHL tracking response parsing caused by inconsistent `leitcode` with the schema type
+-   (improve) DPDHL error parser (#368)
+-   (remove) deprecated field on custom carrier service admin form# Karrio Shipping Platform Edition 2023.4
+
+## What's new
+
+-   (add) `GEODIS` tracking carrier integration
+-   (add) `La Poste` tracking carrier integration
+-   (add) `Boxknight` carrier integration
+-   (add) `Roadie` carrier integration
+-   (add) `Nationex` carrier integration
+-   (introduce) carrier connection default configuration
+-   (improve) order `db` query adding a direct relationship with shipments
+-   (improve) migrations for large datasets
+-   (add) exception-related shipment status mapping between trackers and shipments.
+-   (introduce) label preview for ZPL using `labelary` API
+-   (improve) DHL Express support for EU
+
+### Bug Fixes
+
+-   (fix) tracking info property typo
+    # Karrio 2023.3.4 patch
+
+## Fixes
+
+-   (fix) DHL support for EU rating and label creation
+-   (fix) customs partial update mutation
+-   (add) support for HTML response parsing and update DPDHL error parsing to process HTML responses
+-   (fix) tracker info data merging# Karrio 2023.3.2 patch
+
+## Fixes
+
+-   (fix) UPS ETD integration
+
+Thanks, @jacobshilitz for the patch# Karrio Shipping Platform Edition 2023.3
+
+## What's New
+
+-   (add) DPD carrier integration `carrier-integration`
+-   (enhance) static service level definition with support for zones
+-   (introduce) unified tracking statuses
+-   (enrich) tracking details with package and shipment info
+-   (add) `street_number` field to `Address` model
+-   (add) `carrier_tracking_link` to `shipment.meta`
+
+```
+	"meta": {
+		"carrier_tracking_link": "https://www.fedex.com/fedextrack/?trknbr=794622728852",
+		"tracking_numbers": [
+			"794622728852"
+		],
+		"ext": "fedex",
+		"carrier": "fedex",
+		"service_name": "FEDEX INTERNATIONAL ECONOMY",
+		"rate_provider": "fedex"
+	},
+```
+
+-   (enrich) tracker details with :
+
+```
+{
+ "tracking_number": "string",
+ "carrier_name": "amazon_mws",
+ "account_number": "string",
+ "reference": "string",
+ "info": {
+ "carrier_tracking_link": "string",
+ "customer_name": "string",
+ "expected_delivery": "string",
+ "note": "string",
+ "order_date": "string",
+ "order_id": "string",
+ "package_weight": "string",
+ "package_weight_unit": "string",
+ "shipment_package_count": "string",
+ "shipment_pickup_date": "string",
+ "shipment_delivery_date": "string",
+ "shipment_service": "string",
+ "shipment_origin_country": "string",
+ "shipment_origin_postal_code": "string",
+ "shipment_destication_country": "string",
+ "shipment_destination_postal_code": "string",
+ "shipping_date": "string",
+ "signed_by": "string",
+ "source": "string"
+ }
+}
+```
+
+_Note that you can override all the info fields using `POST /v1/trackers` and `PUT /v1/trackers/{tracker_id}`_
+
+-   (add) `latitude` and `longitude` to the `TrackingEvent` model for future use with last-mile carriers and automatic background updates by Karrio.
+
+## Fixes
+
+-   (revert) to FedEx single call ETD implementation
+-   (invalid) mapping of the `Suburb` field on the `DHL Express Rate` request
+-   (fix) incoherent UPS service names
+
+## Changes
+
+-   (deprecating) `DELETE /v1/orders/{order_id}` in favor of `POST /v1/orders/{order_id}/cancel`
+-   (change) tracking request details at the SDK level.
+-   Introduce `account_number` and `reference`
+-   Remove `level_of_details` and `language`
+-   (renamed) UPS services to be region aware (`This will require draft shipments rates to be refreshed`)
+
+---
+
+# Karrio 2023.1.12 patch
+
+## Changes
+
+-   (fix) regression on one call label generation webhooks trigger
+-   (fix) background data archiving on multi-tenant deployments
+-   (fix) UPS rate fetch inconsistent transit details
+-   (improve) DPDHL requests mapping
+-   (update) DPDHL connection settings to correct the authentication problem
+-   (raise) error when creating trackers if tracking fails by default.
+    And create `tracker` despite errors when `pending_pickup` flag is specified
+-   (improvement) of Sendle tracking details
+
+Special thanks to @DanielOaks for the Sendle tracking API update.# Karrio 2023.1.11 patch
+
+-   (enhance) FedEx ETD integration with single request document uploads and label generation# Karrio 2023.1.10 patch
+
+## Changes
+
+-   (update) `dpdhl` to latest schemas 3.4.0
+-   (update) minor versions for DPDHL SOAP requests
+-   (add) missing UPS shipping options and improve tax parsing
+-   (fix) UPS multi-piece labels bundling
+-   (apply) FedEx ETD requests requirement patches
+-   (introduce) title to commodity as main name
+-   (make) all org tracing records accessible to all org users
+-   (replace) DISTINCT ON by python code for SQLite support of document generation
+    # Karrio Shipping Platform Edition 2023.1
+
+## Changes
+
+-   Migrate to Strawberry for GraphQL support
+-   Karrio Admin API foundation
+-   Finalize OpenID support through karrio apps registration `experimental`
+-   Batch shipment creation (CSV import + batch REST API) `experimental`
+-   Batch order creation (CSV import + batch REST API) `experimental`
+-   Batch tracker creation (CSV import + batch REST API) `experimental`
+-   Add support for shipping `billing_address` and improve support for 3rd party billing
+-   Add carrier capabilities to `/v1/carriers` JSON response
+-   Remove Postgres-specific fields to allow support for any Django ORM-supported databases (MySQL, Oracle, SQLite...)
+-   Add support for `DATABASE_URL` to configure karrio' database connection with a single line
+-   Introduce data retention configuration (set up karrio to flush your database of old shipments, API logs...)
+-   Improve SDK tracing recording for full transparency (only super admin can see requests logs of system carriers)
+-   Add `id` to keyword full-text search for orders and shipments
+-   Improve shipment data GraphQL mutations and draft shipment management.
+-   Improve international shipment with advance duty 3rd party payment address
+
+## Added to open-source build
+
+-   Orders module (read-only orders fulfilment API)
+-   Generic carrier (Register carriers without APIs on karrio to become their API - manage rate sheets, design labels...)
+-   Data module (Batch APIs for data imports and batch creation + data export API)
+-   Documents module (Document generation API + templating system to generate branded shipping documentation)
+-   Document generation use cases: UCC128 labels, Packing slips, branded commercial invoices... anything you need :)
+
+## Dreprecation and Regression
+
+-   Remove support for price range filters to apply rate add-ons
+-   Replace `DELETE /v1/shipments/{id}` by `POST /v1/shipments/{id}/cancel` for shipment cancellation
+-   Deprecating `GET v1/trackers/{carrier_name}/{tracking_number}` in favor of `POST /v1/trackers` for trackers creation
+
+## Dev experience
+
+-   Improve scripts under the `/bin` folder to simplify development and deployment
+-   Introducing Karrio `hobby-deploy` (+ upgrade) to simplify Karrio installation on any cloud with SSL provisioning included
+-   Add `vscode` support debug commands to allow running karrio with debugger and breakpoints
+-   Add scripts to install karrio without docker (Python packages)
+-   Return to SQLite as the default development database to simplify development setup without docker
+
+" "Patch release 2022.8.19
+
+-   Make FedEx ETD optional" "Patch release 2022.8.18
+-   (add) preferred units for FedEx US shipment
+-   (fix) missing options error on FedEx shipment creation
+-   (consolidate) FedEx ETD integration
+
+Special thanks to @nahall for the contribution# Karrio Shipping Platform Edition 2022.8
+
+## Changes
+
+-   Introduce shipping document upload interface for paperless capability
+-   DPDHL carrier integration
+-   UPS Freight JSON API carrier integration
+-   Amazon MWS carrier integration `(experimental)`
+-   Chronopost carrier integration (By @Ftayri)
+-   Move Oauth2 and OpenID support to OSS build
+-   Introduce Karrio CLI powered by [type](https://typer.tiangolo.com/typer-cli/)
+-   Add `freight_class` property to parcel for pallet and LTL shipment support
+-   Introduce organization user roles and group permissions `(insiders-only)`
+    # Karrio Shipping Platform Edition 2022.6
+
+## What's Changed
+
+-   Integrate 2FA for login
+-   Introduce package level options (for package insurance/coverage)
+-   Add support for audit logging (`insiders only`)
+-   Persist carrier requests logs for the foundation of advanced debug mode
+-   Data imports foundation for batch tracking data import (`insiders only`)
+-   Deprecate `test_mode` flags in favour of `API Keys` in a test or live modes
+-   Improve API queries using SQL indexes (API logs, API events, Shipments, Orders...)
+-   Improve and standardized error response
+    # Karrio Shipping Platform Edition 2022.4
+
+### What's New
+
+-   Distinguish carrier hubs extensions from regular extensions
+-   Fix UPS shipment cancellation API call (VOID) (https://github.com/karrioapi/karrio-dashboard/issues/190)
+-   Add GraphQL mutations for webhooks
+-   Add GraphQL mutations for orders
+-   Beta AmazonMws carrier integration
+-   Improve DHL Universal tracking extension response parsing and edge cases from all supported DHL services.
+-   Set fallback values for DHL express extension shipment commodity codes
+-   Set fallback values for FedEx extension shipment address phone numbers.
+-   Add webhook for order update
+-   Reduce noise in carrier request logs (remove duplicates and make logging optional on Serializable abstraction)
+-   Introduce a data module (`insiders only`) for data export (csv, json, xls...). Currently, support exporting orders and shipments
+
+#### Breaking changes
+
+-   Uniformize collection APIs filters for GraphQL and REST APIs
+-   Deprecate noisy properties from rates
+
+**Before**:
+
+```JSON
+{
+ "id": "string",
+ "object_type": "rate",
+ "carrier_name": "string",
+ "carrier_id": "string",
+ "currency": "string",
+ "service": "string",
+ "discount": 0,
+ "base_charge": 0,
+ "total_charge": 0,
+ "duties_and_taxes": 0,
+ "transit_days": 0,
+ "extra_charges": [ ],
+ "meta": { },
+ "test_mode": true
+}
+```
+
+**Now**:
+
+```JSON
+{
+ "id": "string",
+ "object_type": "rate",
+ "carrier_name": "string",
+ "carrier_id": "string",
+ "currency": "string",
+ "service": "string",
+ "total_charge": 0,
+ "transit_days": 0,
+ "extra_charges": [ ],
+ "meta": { },
+ "test_mode": true
+}
+```
+---
+
+# Karrio Shipping Platform Edition 2022.3
+
+## What's New
+
+-   Rebrand Purplship -> Karrio
+-   Improve document management modules (enrich shipment and order template contexts).
+-   Introduce `order.order_date` and `line_item.unfulfilled_quantity` properties for better handling of partial orders.
+-   Improve custom carrier label management
+-   Provide default order and shipment dates
+-   Fix tracker `in_transit` status inconsistency
+-   Introduce Sentry support for Karrio dashboard error tracking and APM" "Purplship Shipping Platform Edition 2022.2
+
+## Road to cloud beta
+
+-   Consolidate email flows for operations that require confirmations
+-   Consolidate organization and team management (`insiders`)
+-   Organization members listing and invitation
+-   Organization ownership transfer
+-   Organization creation
+-   Setup foundations for oauth2 and apps integration (beta) (`insiders`)
+-   Implement Webhook secret header for event origin signature validation
+-   Integrate One-call shipment label purchase
+-   Automate incremental tracking_number generation for customs carrier labels
+-   Order management update (`insiders`)
+-   Introduce `shipping_from` for orginin address prefill
+-   Rename `shipping_address` to `shipping_to`
+
+## Breaking changes
+
+-   **The GraphQL API queries and mutations have been enhanced and some renamed for consistency.**
+    **We highly recommend using the same version on the server and dashboard**
+
+-   **Introduce `docs: Documents = JStruct[Documents, REQUIRED]` to `ShipmentDetails`**
+
+_The implied the removal of the `label: str` field from the root of `ShipmentDetails` to `ShipmentDetails.docs.label`_
+
+Proxy API `POST /v1/proxy/shiping` now returns as `docs` object with `label` base64 string and optionally an `invoice` base64 string
+
+API `Shipment` object now returns
+
+-   `label_url`: URL to the purchase shipment label
+-   `invoice_url`: URL to the purchase shipment invoice when supported
+
+API `Shipment` deprecated data
+
+-   `label` field has been deprecated and removed in order to optimize shipments database queries and size
+-   `shipment.meta.invoice` field has been deprecated and removed for optimization as well
+
+**As a result of this change, shipments requests are less heavy and faster**
+
+## Bugs
+
+-   Inconsistent Charfield validation caused validity pre-request and failure to persist carrier API changes to the database.
+
+## Docker builds
+
+Current release `2022.2` - `danh91.docker.scarf.sh/purplship/server:2022.2`
+" "Purplship Shipping Platform Edition 2022.1
+
+## What's New
+
+-   Introduce `purplship.generic` the custom carrier extension
+-   Add support for custom carrier definition on purplship server
+-   Enrich parcel (package) definition for better support of pallets
+-   Enhance purplship universal extension support with multi-piece shipment support
+-   Introduce order APIs for the relation between order systems and purplship shipments
+-   Introduce label template configuration and custom label generation
+-   Introduce support adding user metadata to purplship objects (`Order`, `Tracker`, `Commodity`, `Shipment`...)
+
+## Breaking changes
+
+_The Shipping REST APIs are focused on automation and single requests to perform shipping operations. The GraphQL API on the other hand powers manual operations from the dashboard with multiple mutations of shipping objects._
+
+For that reason
+
+-   The following endpoints have been removed
+-   `/v1/shipments/<id>/options` to update/add shipment options
+-   `/v1/shipments/<id>/customs` to add shipment customs declaration
+-   `/v1/shipments/<id>/parcels` to add shipment parcels
+
+_There has been many breaking changes on mutations and queries on the GraphQL API so we recommend checking out the [2022.1.4 purplship dashboard release](https://github.com/purplship/purplship-dashboard/releases/tag/v2022.1)_
+
+## Patch & bug fixes
+
+-   Update support for multi-tenant deployment
+-   Prevent automatic tracker creation issues for carriers without `tracking` capabilities
+-   Fix supported destination check for `USPS` domestic extension
+-   Fix background tracker processing error caused uncaught by dead code
+
+## Docker builds
+
+Stable version `2022.1.4`
+danh91.docker.scarf.sh/purplship/server:2022.1.4
+" "Purplship Shipping Platform Edition 2021.11
+
+## What's New
+
+-   Apply Canadian postal code pre-validation patch
+-   Improve Trackers API to accept tracking numbers without a record as pending
+-   Retrieved `estimated_delivery` during tracking for all supporting carriers
+-   Ensure FedEx dimension definitions only when `packaging_type` is `your_packaging`
+-   Introduced Persisted events
+-   Improve FedEx multi-piece shipment compiling all package labels together
+-   Introduce DHL Parcel Poland `sponsored` integration (https://github.com/purplship/purplship/issues/166)
+-   Introduce the purplship universal carrier service level definition
+-   Apply (2121.7.7) database query perf improvements
+-   Introduce `TRACKING_PULSE` env var to setup background trackers update interval seconds
+-   Introduce `BASE_PATH` env var to set up runtime base path for the API (e.g: `/api` for `example.com/api` deployment)
+-   Introduce advanced query filters for shipments, logs, events, trackers and webhooks
+
+## Bugs
+
+-   Fix Webhooks notification scope only to related account and organization" "Purplship Shipping Platform Edition 2021.10
+
+## What's New
+
+-   Enrich `/api/references` endpoint with application metadata info (`APP_NAME`, `APP_VERSION`, `APP_WEBSITE` and other feature flags)
+-   Enhance JWT refresh with support for org switching by providing `org_id`
+-   Improve OpenAPI docs with existing extensions `carrier_name`(s) and shipments and trackers filters status enums
+-   Remove authentication requirement from `/v1/trackers/{id_or_tracking_number}` to simplify trackers access to frontend components
+-   Remove authentication requirement from `/api/references` as it serves as the server metadata now and share any user private info
+-   Change authentication rules for Graphql view (`/graphql`)
+-   The GraphQL Playground can be accessed without being authenticated
+-   However, an authentication header is required now to send authenticated requests and receive users owned data
+-   Introduce user registration, password change, password reset and more through GraphQL mutations
+-   Remove purplship embedded client moving the codebase to https://github.com/purplship/purplship-dashboard
+
+### Bug Fixes
+
+-   Fix circular reference on GraphQL system `carrier.carrier_name` property
+-   Fix bugs with exception raised when there is an existing carrier connection in test mode and not live
+
+### Dev Ex
+
+-   Switched to mono repo bringing `purplship-carriers`, `purplship-bridges`, `purplship-server` and all other satellite projects under `purplship` (this simplifies the development process)
+-   Improve PHP and Python client generator script options
+-   Improve docker setup for local developments
+-   Improve docker setup for testing with the same config as production (went from `6 min` build + test time to `2 min`)
+-   Change namespaces for consistent branding (went from `purpleserver.*` -> `purplship.server.*`)
+-   add as shared .vscode configuration.
+-   Fix JWT regression caused by `PyJWT` dependency
+-   Enhance Docker image startup and graceful-stop with dumb-init
+
+" "purplship SDK 2021.8
+
+## What's new?
+
+-   Increase JSON API response parsing resilience by introducing `to_object` helper that ignores unknown model fields
+-   Use `NamedTuple` to define MeasurementOptionsType instead of `Enum`
+-   Add .vscode config to improve dev ex
+-   Add alpha integration for `ICS Courier`, `UPS Ground` and `Asendia US`" "purplship SDK 2021.7
+
+## Changes
+
+-   Apply flexible service mapping to all carrier integrations. (meaning that if the carrier introduces a service not mapped by purplship, it will still be handled gracefully by collecting the code required for the shipment creation)
+-   Add DHL customs invoice when returned by international shipments
+-   Introduced `account_country_code` as base property to all carrier settings. (This is useful for country-specific carrier accounts)
+-   Deprecate `gateway.features` in favor of `gateway.capabilities` to describe the list of supported operations by carrier gateways
+-   Add pre requests check hooks to validate early carrier gateways capability support as well as country-bounded account usage.
+-   Improve the email notification option
+-   enabled by default if a recipient email is provided
+-   turn the notification off `options: { ..., email_notification: false, ..}`
+-   set specific email for notification `options: { ..., email_notification_to: custom@email.com, ..}`
+
+## Fixes
+
+-   Fix shipment reference for all carriers
+-   Fix Purolator shipment creation error detection for proper parsing
+    " "purplship SDK 2021.6
+
+## Changes
+
+-   Fix FedEx label format
+-   Add human-readable names for options and services
+-   Add blank Purolator label for test mode since label is not supported with the sandbox server
+-   Live tested USPS rating and shipping integration
+-   Rename `purolator_courrier` extension to `purolator`
+-   Make Purolator setting `user_token` optional
+-   Fix Fedex rate timestamp parsing to prevent 0-day returns
+-   Fix DHL preset default units with the right package sizes
+-   Add omitted `contract_id` to Canada post extension for rate requests
+-   Add min dimensions values for FedEx dimension mappers
+-   Handle Optional adjustments values for Canada post rate response
+
+" "Purplship SDK 2021.4
+
+## What's new
+
+-   Enrich customs declaration unified model
+-   Separate duty definition from the shipment payment model
+-   Introduce AddressExtra and a helper to compute address line based on extra
+    " "Purplship SDK 2021.3
+
+## Changes
+
+-   Integrate TNT services (Tracking )
+-   Prepare USPS rating and shipping integration and split up international and local
+-   Rename `ups_package` -> `ups`
+-   Rename `fedex_express` -> `fedex`" "Purplship SDK 2021.2 [tracking spree]
+
+## Carrier Tracking service integration spree
+
+-   integrate `aramex` Tracking API
+-   update `canpar` Full API integration
+-   integrate `australiapost` Tracking API
+-   integrate `dhl_universal` Tracking API
+-   integrate `dicom` Tracking API
+-   integrate `usps` Tracking API
+-   integrate `dicom` Tracking API
+-   integrate `sendle` Tracking API
+-   integrate `sf_express` Tracking API
+-   integrate `yanwen` Tracking API
+-   integrate `yunexpress` Tracking API
+
+## Other
+
+-   Introduce the concept of features for gateways to show supported APIs dynamically
+-   Make Purolator `user_token` required to set up a Purolator gateway
+-   Improve canpar's SOAP requests ensuring proper namespace prefixes for all nodes
+    " "Purplship SDK 2021.1
+
+## Major Changes
+
+-   Introduce `poetry` for packaging
+-   Make Purplship API interface uniform with `purplship.[API].[request](...).from_(gateway).parse()`
+-   Deploy `purplship` and all `purplship.extensions` wheels on Pypi
+
+### Enhancements
+
+-   Introduce extension tests templates
+-   Log request URLs
+-   Update docs" "[release] Purplship SDK 2020.12 (docs and contribution friendly)
+
+## Docs and Contribution Friendly
+
+-   Introduce Purplship SDK docs with `Mkdocs`
+-   Introduce formal Purplship Extension with the `Metadata` definition
+-   Introduce basic documentation for `Custom Carrier`
+-   Add Purplship extension template" "Purplship SDK 2020.12.1 [patch]
+
+## What's New
+
+-   Introduced `MeasurementOptions` as Dimension and Weight output customization for each carrier
+-   Introduced `label_type` as a requirement for shipment creation
+
+## Fixes
+
+-   Fix unsupported Canada post decimal values for dimensions and weight
+-   Prevent confusing Purolator exception when address properties are required and not defined
+-   Fix invalid `CM` -> `IN` conversion
+-   Consolidated `Purolator` shipment cancellation request"
