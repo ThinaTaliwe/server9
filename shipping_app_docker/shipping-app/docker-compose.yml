@@ -1,0 +1,57 @@
+services:
+  app:
+    image: php:8.2-fpm
+    container_name: shipping_app_app
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - db
+    command: sh -c "apt-get update && apt-get install -y git curl unzip zip libzip-dev libpng-dev libonig-dev libxml2-dev libicu-dev default-mysql-client && docker-php-ext-install pdo pdo_mysql mbstring bcmath gd zip intl && php-fpm"
+    networks:
+      - shipping_net
+
+  composer:
+    image: composer:2
+    container_name: shipping_app_composer
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - shipping_net
+
+  web:
+    image: nginx:alpine
+    container_name: shipping_app_nginx
+    ports:
+      - "8098:80"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - shipping_net
+
+  db:
+    image: mysql:8.0
+    container_name: shipping_app_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: shipping_db
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_USER: shipping_user
+      MYSQL_PASSWORD: shipping_pass
+    ports:
+      - "33068:3306"
+    volumes:
+      - shipping_mysql_data:/var/lib/mysql
+    networks:
+      - shipping_net
+
+volumes:
+  shipping_mysql_data:
+
+networks:
+  shipping_net:
+    driver: bridge

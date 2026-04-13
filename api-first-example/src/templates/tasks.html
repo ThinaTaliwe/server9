@@ -1,0 +1,507 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<span id="csrf-token" data-token="{{ request.scope.csrftoken }}" ></span>
+
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Operations Task Board</h1>
+      <p class="muted">Create, view, and update tasks using the same FastAPI backend.</p>
+    </div>
+  </div>
+
+  <div class="task-layout">
+    <section class="panel form-panel">
+      <h2>Create Task</h2>
+
+      <div class="form-grid">
+        <div class="field full">
+          <label for="task-title">Title</label>
+          <input type="text" id="task-title" placeholder="Enter task title">
+        </div>
+
+        <div class="field full">
+          <label for="task-description">Description</label>
+          <textarea id="task-description" rows="4" placeholder="Add details"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="task-status">Status</label>
+          <select id="task-status">
+            <option value="todo">To Do</option>
+            <option value="in_progress">In Progress</option>
+            <option value="blocked">Blocked</option>
+            <option value="done">Done</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="task-priority">Priority</label>
+          <select id="task-priority">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+            <option value="urgent">Urgent</option>
+          </select>
+        </div>
+
+        <div class="field full">
+          <label for="task-due-date">Due Date</label>
+          <input type="date" id="task-due-date">
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="task-save-btn">Create Task</button>
+      </div>
+
+      <div id="form-message" class="message muted"></div>
+    </section>
+
+    <section class="panel list-panel">
+      <div class="list-header">
+        <h2>Tasks</h2>
+
+        <div class="filters">
+          <select id="filter-status">
+            <option value="">All Statuses</option>
+            <option value="todo">To Do</option>
+            <option value="in_progress">In Progress</option>
+            <option value="blocked">Blocked</option>
+            <option value="done">Done</option>
+          </select>
+
+          <select id="filter-priority">
+            <option value="">All Priorities</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+            <option value="urgent">Urgent</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="task-list" class="task-list"></div>
+    </section>
+  </div>
+</div>
+
+<style>
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-header h1 {
+  margin: 0 0 6px 0;
+}
+
+.muted {
+  color: #666;
+}
+
+.task-layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 20px;
+}
+
+.panel {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field.full {
+  grid-column: 1 / -1;
+}
+
+input, textarea, select, button {
+  font: inherit;
+}
+
+input, textarea, select {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+}
+
+button {
+  border: 0;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: #111827;
+  color: #fff;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: .92;
+}
+
+.actions {
+  margin-top: 16px;
+}
+
+.message {
+  margin-top: 12px;
+  min-height: 20px;
+}
+
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.filters {
+  display: flex;
+  gap: 10px;
+}
+
+.task-list {
+  display: grid;
+  gap: 14px;
+}
+
+.task-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 14px;
+  background: #fafafa;
+}
+
+.task-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.task-title {
+  font-weight: 700;
+  font-size: 16px;
+  margin: 0;
+}
+
+.task-description {
+  margin: 0 0 10px 0;
+  white-space: pre-wrap;
+}
+
+.task-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  border: 1px solid #ddd;
+  background: #fff;
+}
+
+.badge.todo { background: #f3f4f6; }
+.badge.in_progress { background: #dbeafe; }
+.badge.blocked { background: #fee2e2; }
+.badge.done { background: #dcfce7; }
+
+.badge.low { background: #f3f4f6; }
+.badge.medium { background: #fef3c7; }
+.badge.high { background: #fed7aa; }
+.badge.urgent { background: #fecaca; }
+
+.task-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.task-footer small {
+  color: #666;
+}
+
+.task-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.task-actions button {
+  background: #374151;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.empty-state {
+  padding: 24px;
+  text-align: center;
+  color: #666;
+  border: 1px dashed #ccc;
+  border-radius: 12px;
+  background: #fafafa;
+}
+
+@media (max-width: 900px) {
+  .task-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .list-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+</style>
+
+<script>
+const API_ROOT = "http://localhost:5000";
+const taskList = document.getElementById("task-list");
+const formMessage = document.getElementById("form-message");
+
+const titleInput = document.getElementById("task-title");
+const descriptionInput = document.getElementById("task-description");
+const statusInput = document.getElementById("task-status");
+const priorityInput = document.getElementById("task-priority");
+const dueDateInput = document.getElementById("task-due-date");
+const saveBtn = document.getElementById("task-save-btn");
+
+const filterStatus = document.getElementById("filter-status");
+const filterPriority = document.getElementById("filter-priority");
+
+let allTasks = [];
+
+function csrfToken() {
+  const el = document.getElementById("csrf-token");
+  return el.getAttribute("data-token");
+}
+
+async function apiFetch(url, options = {}) {
+  const headers = Object.assign({}, options.headers || {});
+
+  if (options.body && !headers["Content-Type"]) {
+    headers["Content-Type"] = "application/json;charset=utf-8";
+  }
+
+  headers["x-csrftoken"] = csrfToken();
+
+  const res = await fetch(url, {
+    credentials: "include",
+    ...options,
+    headers
+  });
+
+  const text = await res.text();
+
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    data = { raw: text };
+  }
+
+  return { res, data };
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function formatDate(value) {
+  if (!value) return "No due date";
+  return value;
+}
+
+function renderTasks() {
+  const status = filterStatus.value;
+  const priority = filterPriority.value;
+
+  let tasks = [...allTasks];
+
+  if (status) {
+    tasks = tasks.filter(t => t.status === status);
+  }
+
+  if (priority) {
+    tasks = tasks.filter(t => t.priority === priority);
+  }
+
+  taskList.innerHTML = "";
+
+  if (!tasks.length) {
+    taskList.innerHTML = `<div class="empty-state">No tasks found.</div>`;
+    return;
+  }
+
+  tasks.forEach(task => {
+    const el = document.createElement("div");
+    el.className = "task-card";
+
+    el.innerHTML = `
+      <div class="task-card-header">
+        <div>
+          <h3 class="task-title">${escapeHtml(task.title || task.description || "Untitled task")}</h3>
+        </div>
+      </div>
+
+      <p class="task-description">${escapeHtml(task.description || "")}</p>
+
+      <div class="task-meta">
+        <span class="badge ${escapeHtml(task.status)}">${escapeHtml(task.status)}</span>
+        <span class="badge ${escapeHtml(task.priority)}">${escapeHtml(task.priority)}</span>
+        <span class="badge">${escapeHtml(formatDate(task.due_date))}</span>
+      </div>
+
+      <div class="task-footer">
+        <small>Updated: ${escapeHtml(task.updated_at || "-")}</small>
+
+        <div class="task-actions">
+          <button data-action="toggle" data-id="${escapeHtml(task.id)}">
+            ${task.status === "done" ? "Undo" : "Mark done"}
+          </button>
+        </div>
+      </div>
+    `;
+
+    taskList.appendChild(el);
+  });
+
+  taskList.querySelectorAll('button[data-action="toggle"]').forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const id = btn.getAttribute("data-id");
+      const task = allTasks.find(t => t.id === id);
+      if (!task) return;
+
+      const nextStatus = task.status === "done" ? "todo" : "done";
+      const nextDone = nextStatus === "done";
+
+      const payload = {
+        id: task.id,
+        title: task.title || task.description || "Untitled task",
+        description: task.description || "",
+        status: nextStatus,
+        priority: task.priority || "medium",
+        due_date: task.due_date || null,
+        done: nextDone
+      };
+
+      const { res, data } = await apiFetch(`${API_ROOT}/tasks/${task.id}`, {
+        method: "PUT",
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        formMessage.textContent = "Failed to update task.";
+        return;
+      }
+
+      await loadTasks();
+    });
+  });
+}
+
+async function loadTasks() {
+  const { res, data } = await apiFetch(`${API_ROOT}/tasks`);
+
+  if (!res.ok) {
+    taskList.innerHTML = `<div class="empty-state">Failed to load tasks.</div>`;
+    return;
+  }
+
+  allTasks = data.tasks || [];
+  renderTasks();
+}
+
+async function saveTask() {
+  formMessage.textContent = "";
+
+  const title = titleInput.value.trim();
+  const description = descriptionInput.value.trim();
+  const status = statusInput.value;
+  const priority = priorityInput.value;
+  const due_date = dueDateInput.value || null;
+
+  if (!title) {
+    formMessage.textContent = "Title is required.";
+    return;
+  }
+
+  saveBtn.disabled = true;
+  saveBtn.textContent = "Creating...";
+
+  const payload = {
+    title,
+    description,
+    status,
+    priority,
+    due_date
+  };
+
+  const { res, data } = await apiFetch(`${API_ROOT}/tasks`, {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+
+  saveBtn.disabled = false;
+  saveBtn.textContent = "Create Task";
+
+  if (!res.ok) {
+    formMessage.textContent = "Failed to create task.";
+    console.log(data);
+    return;
+  }
+
+  titleInput.value = "";
+  descriptionInput.value = "";
+  statusInput.value = "todo";
+  priorityInput.value = "medium";
+  dueDateInput.value = "";
+  formMessage.textContent = "Task created successfully.";
+
+  await loadTasks();
+}
+
+saveBtn.addEventListener("click", saveTask);
+filterStatus.addEventListener("change", renderTasks);
+filterPriority.addEventListener("change", renderTasks);
+
+loadTasks();
+</script>
+
+{% endblock content %}

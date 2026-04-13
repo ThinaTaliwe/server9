@@ -1,0 +1,30 @@
+version: '3.9'
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: logistics
+      MYSQL_USER: logistics
+      MYSQL_PASSWORD: logistics
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  app:
+    build: .
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: mysql+pymysql://logistics:logistics@db/logistics
+      SHIPSGO_BASE_URL: https://api.shipsgo.com/v2
+      SHIPSGO_TOKEN: 32596A9A-8207-4BA9-9679-3DEFBA1B4FA1
+      SEARATE_BASE_URL: https://tracking.searates.com
+      SEARATE_API_KEY: K-1BF0B019-892E-47FC-B522-B2DF786BABFF
+    ports:
+      - "8009:8000"
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+volumes:
+  db_data:

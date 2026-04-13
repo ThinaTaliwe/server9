@@ -1,0 +1,249 @@
+version: "3.8"
+
+services:
+  # ---------------------------------------------------------------------------
+  # Database for Fleetbase
+  # ---------------------------------------------------------------------------
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      # A strong root password is not strictly required for local development
+      MYSQL_ROOT_PASSWORD: fleetbase_root
+      MYSQL_DATABASE: fleetbase
+      MYSQL_USER: fleetbase
+      MYSQL_PASSWORD: fleetbase_pass
+    volumes:
+      # Persist MySQL data on the host
+      - mysql-data:/var/lib/mysql
+    ports:
+      # Expose MySQL on an alternate host port (3306 is already in use on host)
+      - "3310:3306"
+
+  # ---------------------------------------------------------------------------
+  # Redis cache and queue backend shared by Fleetbase
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  # ---------------------------------------------------------------------------
+  # Fleetbase API service
+  #
+  # This container runs the Fleetbase API (Laravel) application. It connects to
+  # MySQL and Redis via the environment variables below. When running locally
+  # the API will be exposed on port 8000.
+  # ---------------------------------------------------------------------------
+  fleetbase_api:
+    image: fleetbase/fleetbase-api:latest
+    restart: unless-stopped
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      # Base URL for the API (used by CORS and console)
+      APP_URL: http://localhost:8010
+      # URL of the console; required by CORS. When self‑hosting locally this is
+      # localhost on port 4200.
+      CONSOLE_HOST: http://localhost:4200
+      # Database connection using the mysql service defined above
+      DATABASE_URL: mysql://fleetbase:fleetbase_pass@mysql:3306/fleetbase
+      # Redis connection for queues and caching
+      REDIS_URL: redis://redis:6379
+      CACHE_DRIVER: redis
+      QUEUE_CONNECTION: redis
+      CACHE_URL: redis://redis:6379
+      # Base application settings
+      APP_NAME: Fleetbase
+      SESSION_DOMAIN: localhost
+      LOG_CHANNEL: stack
+      # Optional OSRM server used for route lookup in the Fleetbase API. This
+      # points at the osrm service defined below. If you do not need this you
+      # can remove it.
+      OSRM_HOST: https://router.project-osrm.org
+    ports:
+      # Map the Fleetbase API to host port 8010 instead of 8000
+      - "8010:8000"
+
+  # ---------------------------------------------------------------------------
+  # SocketCluster server used by the Fleetbase console for real‑time updates.
+  # You can omit this service if you do not need WebSocket support. When
+  # enabled it should be referenced in the console environment below.
+  # ---------------------------------------------------------------------------
+  socketcluster:
+    image: socketcluster/socketcluster:v17.4.0
+    restart: unless-stopped
+    environment:
+      # Number of worker and broker processes. Adjust to the number of
+      # CPU cores on your host.
+      SOCKETCLUSTER_WORKERS: 2
+      SOCKETCLUSTER_BROKERS: 2
+      # Restrict origins for development. Set to your domain in production.
+      SOCKETCLUSTER_OPTIONS: '{"origins":"http://localhost:*"}'
+    ports:
+      - "38000:8000"
+    depends_on:
+      - fleetbase_api
+
+  # ---------------------------------------------------------------------------
+  # Fleetbase console (frontend)
+  #
+  # The console is the Angular front‑end for managing Fleetbase. It talks to
+  # the API and SocketCluster services defined above. When running locally
+  # it will be served on port 4200.
+  # ---------------------------------------------------------------------------
+  fleetbase_console:
+    image: fleetbase/fleetbase-console:latest
+    restart: unless-stopped
+    depends_on:
+      - fleetbase_api
+    environment:
+      # Location of the API service from inside the Docker network
+      API_HOST: http://fleetbase_api:8000
+      # Real‑time socket server
+      SOCKETCLUSTER_HOST: socketcluster
+      SOCKETCLUSTER_PORT: 8000
+    ports:
+      - "4200:4200"
+
+  # ---------------------------------------------------------------------------
+  # Karrio PostgreSQL database
+  #
+  # Karrio uses PostgreSQL instead of MySQL. This service provisions a
+  # dedicated Postgres instance. Feel free to adjust the default password.
+  # ---------------------------------------------------------------------------
+  karrio_db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: karrio
+      POSTGRES_USER: karrio
+      POSTGRES_PASSWORD: karrio_pass
+    volumes:
+      - karrio-postgres-data:/var/lib/postgresql/data
+    ports:
+      # Expose Postgres on a non‑default port to avoid conflicts
+      - "5433:5432"
+
+  # ---------------------------------------------------------------------------
+  # Karrio Redis cache
+  # ---------------------------------------------------------------------------
+  karrio_redis:
+    image: redis:alpine
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Karrio API server
+  #
+  # This service exposes the Karrio REST API on port 5002. It uses the
+  # environment variables listed below to connect to Postgres and Redis.
+  #
+  # See the official documentation for more information on available
+  # configuration options: https://www.karrio.io/docs/self-hosting/docker
+  # ---------------------------------------------------------------------------
+  karrio_api:
+    image: karrio.docker.scarf.sh/karrio/server:2024.12.8
+    restart: unless-stopped
+    depends_on:
+      - karrio_db
+      - karrio_redis
+    environment:
+      DEBUG_MODE: "True"
+      DETACHED_WORKER: "True"
+      SECRET_KEY: change_this_secret_for_production
+      REDIS_HOST: karrio_redis
+      REDIS_PORT: 6379
+      DATABASE_ENGINE: postgresql
+      DATABASE_HOST: karrio_db
+      DATABASE_PORT: 5432
+      DATABASE_NAME: karrio
+      DATABASE_USERNAME: karrio
+      DATABASE_PASSWORD: karrio_pass
+      KARRIO_HTTP_PORT: 5002
+      ENABLE_ALL_PLUGINS_BY_DEFAULT: "True"
+    ports:
+      # Map host port 5005 to container port 5002 (5000+ ports are already used)
+      - "5005:5002"
+    # Health check removed.  The previous health check used a non‑existent
+    # endpoint and marked the container as unhealthy.  Karrio does not expose a
+    # dedicated /health endpoint by default.  Use `docker compose logs karrio_api` to
+    # monitor startup instead.
+
+  # ---------------------------------------------------------------------------
+  # Karrio worker
+  #
+  # A background worker is required to process asynchronous tasks. It uses
+  # nearly the same image as the API server and reuses the same database and
+  # Redis configuration. The command starts the built‑in worker script.
+  # ---------------------------------------------------------------------------
+  karrio_worker:
+    image: karrio.docker.scarf.sh/karrio/server:2024.12.8
+    restart: unless-stopped
+    depends_on:
+      - karrio_db
+      - karrio_redis
+      - karrio_api
+    environment:
+      REDIS_HOST: karrio_redis
+      REDIS_PORT: 6379
+      DATABASE_ENGINE: postgresql
+      DATABASE_HOST: karrio_db
+      DATABASE_PORT: 5432
+      DATABASE_NAME: karrio
+      DATABASE_USERNAME: karrio
+      DATABASE_PASSWORD: karrio_pass
+      ENABLE_ALL_PLUGINS_BY_DEFAULT: "True"
+    command: "/bin/bash ./worker"
+
+  # ---------------------------------------------------------------------------
+  # Karrio dashboard
+  #
+  # This service exposes the React/Next.js front‑end used to manage the Karrio
+  # instance. It requires a few secrets for JWT authentication. Do not use the
+  # default secrets in production.
+  # ---------------------------------------------------------------------------
+  karrio_dashboard:
+    image: karrio.docker.scarf.sh/karrio/dashboard:2024.12.8
+    restart: unless-stopped
+    depends_on:
+      - karrio_api
+    environment:
+      AUTH_TRUST_HOST: "true"
+      NEXTAUTH_SECRET: change_this_secret_for_production
+      DASHBOARD_PORT: 3002
+      # Update host URLs to match the new port mappings. These URLs are used
+      # by the front‑end and should reflect the external (host) ports.
+      NEXT_PUBLIC_DASHBOARD_URL: http://localhost:3005
+      NEXT_PUBLIC_KARRIO_PUBLIC_URL: http://localhost:5005
+      KARRIO_URL: http://karrio_api:5002
+    ports:
+      # Expose dashboard on host port 3005 rather than 3002
+      - "3005:3002"
+
+  # ---------------------------------------------------------------------------
+  # OSRM route server
+  #
+  # Fleetbase and your gateway can call this service to obtain distance and
+  # travel time information. You must supply map data in the ./osrm/data
+  # directory. The default command starts the routing service on port 5000.
+  # ---------------------------------------------------------------------------
+  gateway:
+    build: ./gateway
+    restart: unless-stopped
+    depends_on:
+      - fleetbase_api
+      - karrio_api
+    environment:
+      FLEETBASE_API_URL: http://fleetbase_api:8000
+      KARRIO_API_URL: http://karrio_api:5002
+      OSRM_URL: https://router.project-osrm.org
+    ports:
+      # Expose the gateway on host port 8011 (avoiding 8001/8000)
+      - "8011:80"
+
+
+volumes:
+  mysql-data:
+  karrio-postgres-data:
